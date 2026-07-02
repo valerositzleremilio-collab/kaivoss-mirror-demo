@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kai Voss — Formel-1-Fahrer · Saison 2026</title>
+  <meta name="description" content="Kai Voss — Formel-1-Fahrer der Saison 2026. Helm-Archiv, Rennmomente und die offizielle KV Kollektion. Immer im Kampfmodus." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2323261c'/%3E%3Cpath d='M22 24 L22 76 M22 50 L46 24 M28 50 L46 76' stroke='%23c8ff1e' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M56 24 L70 76 L84 24' stroke='%23c8ff1e' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;800;900&family=Archivo+Expanded:wght@800;900&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ===================================================================
+       TASK 1 — DESIGN SYSTEM (single source of truth in :root)
+       =================================================================== */
+    :root {
+      /* Color */
+      --bg-dark: #23261c;
+      --ink: #f2f2ea;
+      --surface-1: #35372f;
+      --surface-2: #4e4f49;
+      --light: #e9ecdd;
+      --light-2: #b7bba8;
+      --accent: #c8ff1e;
+      --accent-off: #a8bd3a;
+      --accent-zero: #c8ff1e00;
+      --ember: #ff6b00;
+
+      /* Type scale */
+      --t-eyebrow: .6rem;
+      --t-body: 1.1rem;
+      --t-reg: 1.6rem;
+      --t-med: 2.75rem;
+      --t-h1: clamp(3rem, 6vw, 4.5rem);
+      --t-impact: clamp(4.5rem, 11vw, 8rem);
+
+      /* Motion — one ease, one duration, everywhere */
+      --ease: cubic-bezier(0.65, 0.05, 0.36, 1);
+      --dur: .75s;
+
+      /* Spacing derived from one gap */
+      --gap: 1.25rem;
+      --pad-x: 2rem;
+      --pad-y: calc(3.5rem + var(--gap) * 2);
+
+      /* Radius family */
+      --r-sm: 1rem;
+      --r-md: 3rem;
+      --r-lg: 6.25rem;
+
+      /* Film grain (SVG fractalNoise data-URI) */
+      --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--ink);
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: var(--t-body);
+      line-height: 1.5;
+      overflow-x: clip; /* clip on body; never the hidden variant on html */
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg-dark); }
+
+    .display {
+      font-family: "Archivo Expanded", "Archivo", sans-serif;
+      font-weight: 900;
+      line-height: .92;
+      letter-spacing: -0.01em;
+    }
+
+    .eyebrow {
+      font-family: "Archivo", sans-serif;
+      font-weight: 800;
+      font-size: var(--t-eyebrow);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      color: var(--light-2);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    .container {
+      width: 100%;
+      max-width: 1440px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+    }
+
+    .section { padding-block: var(--pad-y); position: relative; }
+
+    /* Signature underline stroke reused across sections */
+    .underline-stroke { display: inline-block; width: clamp(120px, 22vw, 260px); height: auto; color: var(--accent); }
+    .underline-stroke path { stroke-dasharray: 400; stroke-dashoffset: 0; }
+
+    /* ---- KV monogram ---- */
+    .kv-mono { display: inline-block; color: var(--accent); }
+
+    /* ===================================================================
+       NAV
+       =================================================================== */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem var(--pad-x);
+      background: rgba(35, 38, 28, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(200, 255, 30, 0.22);
+    }
+    .nav__brand { display: flex; align-items: center; gap: .6rem; }
+    .nav__brand .kv-mono { width: 34px; height: 34px; }
+    .nav__brand span { font-family: "Archivo", sans-serif; font-weight: 800; letter-spacing: .12em; font-size: .8rem; text-transform: uppercase; }
+    .nav__links { display: flex; align-items: center; gap: 1.75rem; }
+    .nav__links a {
+      font-family: "Archivo", sans-serif;
+      font-weight: 500;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--light-2);
+      transition: color var(--dur) var(--ease);
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .nav__links a:not(.pill):hover { color: var(--ink); }
+    .pill {
+      background: var(--accent);
+      color: var(--bg-dark) !important;
+      padding: .55rem 1.2rem;
+      border-radius: var(--r-lg);
+      font-weight: 800 !important;
+      transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .pill:hover { background: #d6ff4d; }
+    .pill:active { transform: scale(0.97); }
+
+    .nav__toggle { display: none; background: none; border: 0; color: var(--ink); cursor: pointer; min-width: 44px; min-height: 44px; }
+
+    /* ===================================================================
+       TASK 2 — HERO
+       =================================================================== */
+    .hero {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 7rem var(--pad-x) var(--pad-y);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(120% 90% at 15% 10%, rgba(200,255,30,.10), transparent 55%),
+        radial-gradient(90% 70% at 90% 100%, rgba(78,79,73,.5), transparent 60%),
+        var(--bg-dark);
+    }
+    .hero::after { /* film grain overlay */
+      content: ""; position: absolute; inset: 0; background-image: var(--grain);
+      opacity: .05; mix-blend-mode: overlay; pointer-events: none;
+    }
+
+    /* Marquee eyebrow */
+    .marquee {
+      overflow: hidden; white-space: nowrap; width: 100%;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+    .marquee__track { display: inline-flex; animation: marquee 22s linear infinite; }
+    .marquee__track span { padding-right: 2.4rem; color: var(--accent-off); }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .hero__inner { position: relative; z-index: 2; max-width: 1440px; margin-inline: auto; width: 100%; }
+    .hero__eyebrow-wrap { margin-bottom: 1.5rem; }
+
+    /* Mask-reveal wrappers */
+    .reveal-line { overflow: hidden; display: block; }
+    .reveal-line > * {
+      display: block;
+      transform: translateY(110%);
+      animation: rise var(--dur) var(--ease) forwards;
+    }
+    @keyframes rise { to { transform: translateY(0); } }
+    .rl-1 > * { animation-delay: .10s; }
+    .rl-2 > * { animation-delay: .30s; }
+    .rl-3 > * { animation-delay: .50s; }
+    .rl-4 > * { animation-delay: .70s; }
+    .rl-5 > * { animation-delay: .90s; }
+
+    .hero h1 { font-size: var(--t-impact); color: var(--ink); }
+    .hero__sub { font-size: var(--t-reg); color: var(--light-2); margin-top: .75rem; font-weight: 500; }
+
+    .hero__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap; }
+
+    /* Next race widget */
+    .next-race {
+      border: 1px solid rgba(200,255,30,.35);
+      border-radius: var(--r-sm);
+      padding: 1rem 1.25rem;
+      background: rgba(53,55,47,.4);
+      backdrop-filter: blur(6px);
+      min-width: 240px;
+    }
+    .next-race .eyebrow { color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+    .next-race .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(200,255,30,.5); animation: pulse 2s var(--ease) infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(200,255,30,.5);} 70%{ box-shadow: 0 0 0 8px rgba(200,255,30,0);} 100%{ box-shadow:0 0 0 0 rgba(200,255,30,0);} }
+    .next-race__name { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1.5rem; margin-top: .4rem; }
+    .next-race__date { color: var(--light-2); font-size: .95rem; }
+
+    .hero__sig { color: var(--accent); width: clamp(90px, 12vw, 150px); height: auto; }
+
+    /* ===================================================================
+       TASK 3 — EDITORIAL STATEMENT
+       =================================================================== */
+    .statement { background: var(--bg-dark); }
+    .statement__text {
+      font-family: "Archivo Expanded", "Archivo", sans-serif;
+      font-weight: 800;
+      font-size: var(--t-med);
+      line-height: 1.12;
+      max-width: 20ch;
+      letter-spacing: -0.01em;
+    }
+    .statement__text .word { display: inline-block; }
+    em.hl { font-style: normal; color: var(--accent); }
+    strong.hl { color: var(--ink); font-weight: 900; }
+
+    /* ===================================================================
+       TASK 4 — HORIZONTAL MOMENT GALLERY
+       =================================================================== */
+    .gallery { background: var(--bg-dark); overflow: hidden; }
+    .gallery__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .gallery__head h2 { font-size: var(--t-h1); }
+    /* Default (no-JS / reduced-motion): gallery is a fully visible wrapped grid */
+    .pin-wrap { height: auto; overflow: hidden; }
+    .track { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; padding: 1rem var(--pad-x); will-change: transform; }
+    /* Pinned horizontal layout only when JS wires the ScrollTrigger */
+    .gallery-pinned .pin-wrap { height: 100dvh; }
+    .gallery-pinned .track { flex-wrap: nowrap; height: 100%; padding-block: 0; }
+    .card {
+      position: relative;
+      flex: 0 0 clamp(280px, 34vw, 460px);
+      height: min(70vh, 560px);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      background: var(--surface-1);
+    }
+    .card__media { position: absolute; inset: 0; }
+    .card__media::after { content: ""; position: absolute; inset: 0; background-image: var(--grain); opacity: .12; mix-blend-mode: overlay; }
+    .card__vignette { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 0%, transparent 40%, rgba(0,0,0,.45)); }
+    .card__caption { position: absolute; top: 1.25rem; left: 1.25rem; z-index: 2; color: var(--ink); }
+    .card__caption .eyebrow { color: var(--accent); }
+
+    /* olive/lime mesh grades — one consistent family */
+    .grade-1 { background: radial-gradient(80% 90% at 20% 10%, #4e5b1f, transparent 60%), radial-gradient(70% 80% at 90% 90%, #2e3520, transparent 55%), linear-gradient(140deg, #35372f, #1c1f16); }
+    .grade-2 { background: radial-gradient(90% 90% at 80% 10%, #667a1f, transparent 55%), radial-gradient(60% 70% at 10% 80%, #2b3420, transparent 55%), linear-gradient(160deg, #3a3d31, #23261c); }
+    .grade-3 { background: radial-gradient(70% 90% at 50% 100%, #7f9a2a, transparent 55%), radial-gradient(80% 80% at 10% 0%, #33381f, transparent 55%), linear-gradient(120deg, #30332a, #1a1d15); }
+    .grade-4 { background: radial-gradient(90% 70% at 30% 90%, #556b1d, transparent 55%), radial-gradient(70% 70% at 90% 20%, #40492a, transparent 55%), linear-gradient(200deg, #383b2f, #202318); }
+
+    .card--quote, .card--stat { display: flex; flex-direction: column; justify-content: center; padding: 2.5rem; }
+    .card--quote { background: var(--surface-1); border: 1px solid rgba(200,255,30,.18); }
+    .card--quote blockquote { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1.9rem; line-height: 1.15; }
+    .card--quote blockquote em.hl { display: inline; }
+    .card--quote footer { margin-top: 1.5rem; }
+    .card--stat { background: var(--accent); color: var(--bg-dark); }
+    .card--stat .stat__num { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: clamp(4rem, 8vw, 7rem); line-height: .9; }
+    .card--stat .stat__label { font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; font-size: .9rem; margin-top: .5rem; }
+    .card__sig { position: absolute; bottom: 1.25rem; right: 1.25rem; z-index: 2; color: var(--accent); width: 76px; height: auto; }
+
+    /* ===================================================================
+       TASK 5 — SPLIT SECTIONS (light rhythm break)
+       =================================================================== */
+    .split { background: var(--light); color: var(--bg-dark); }
+    .split__block { padding-block: 2rem; border-top: 1px solid rgba(35,38,28,.14); }
+    .split__block:first-of-type { border-top: 0; }
+    .split__grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 2rem; align-items: end; }
+    .word-pair { line-height: .86; }
+    .word-pair .big {
+      display: block;
+      font-family: "Archivo Expanded","Archivo",sans-serif;
+      font-weight: 900;
+      font-size: var(--t-impact);
+      -webkit-text-stroke: 2px var(--bg-dark);
+      color: transparent;
+      transition: color var(--dur) var(--ease), -webkit-text-stroke-color var(--dur) var(--ease);
+    }
+    .word-pair .mid { display: inline-block; font-size: var(--t-eyebrow); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--surface-2); margin: .2rem 0; }
+    .split__block:hover .word-pair .big { color: var(--accent-off); -webkit-text-stroke-color: var(--accent-off); }
+    .split__desc { font-size: var(--t-reg); line-height: 1.2; max-width: 30ch; }
+    .split__link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; }
+    .split__link svg { transition: transform var(--dur) var(--ease); }
+    .split__link:hover svg { transform: translateX(6px); }
+
+    /* ===================================================================
+       TASK 6 — HELM-GRID
+       =================================================================== */
+    .helmets { background: var(--bg-dark); }
+    .helmets__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .helmets__head h2 { font-size: var(--t-h1); }
+    .helmet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+    .helmet-card {
+      position: relative;
+      background: var(--surface-1);
+      border-radius: var(--r-sm);
+      padding: 1.5rem 1.5rem 1.25rem;
+      overflow: hidden;
+      transition: transform var(--dur) var(--ease);
+    }
+    .helmet-card__art { position: relative; aspect-ratio: 1/1; }
+    .helmet-card__art svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+    .helmet-card__art .hh-hover { opacity: 0; }
+    .helmet-card:hover { transform: translateY(-4px); }
+    .helmet-card:hover .hh-base { opacity: 0; }
+    .helmet-card:hover .hh-hover { opacity: 1; transform: scale(1.04); }
+    .helmet-card__meta { display: flex; align-items: baseline; justify-content: space-between; margin-top: 1rem; }
+    .helmet-card__meta .name { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1.05rem; }
+
+    /* ===================================================================
+       TASK 7 — STORE CTA (only accent-flooded section)
+       =================================================================== */
+    .store-cta { background: var(--accent); color: var(--bg-dark); text-align: center; }
+    .store-cta__inner { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .store-cta h2 { font-size: var(--t-impact); }
+    .store-cta h2 .dot { color: var(--ember); }
+    .store-cta p { font-size: var(--t-reg); max-width: 24ch; margin-inline: auto; }
+    .btn-dark {
+      background: var(--bg-dark);
+      color: var(--ink);
+      padding: 1rem 2.25rem;
+      border-radius: var(--r-lg);
+      font-family: "Archivo", sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-size: .95rem;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .btn-dark:hover { background: #2c3024; }
+    .btn-dark:active { transform: scale(0.97); }
+
+    /* ===================================================================
+       TASK 8 — PARTNER MARQUEE + FOOTER
+       =================================================================== */
+    .partners { background: var(--bg-dark); padding-block: 3rem; border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .partners .marquee__track { animation-duration: 30s; }
+    .partners .marquee__track:hover, .partners .marquee:hover .marquee__track { animation-play-state: paused; }
+    .partners .wordmark { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: .04em; color: var(--surface-2); padding-right: 3rem; transition: color var(--dur) var(--ease); }
+    .partners .wordmark:hover { color: var(--light-2); }
+
+    .footer { background: var(--bg-dark); padding-block: var(--pad-y) 2rem; }
+    .footer__statement { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .footer__statement h2 { font-size: var(--t-impact); }
+    .footer__statement .kv-mono { width: clamp(60px, 8vw, 100px); height: auto; }
+    .footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; border-top: 1px solid rgba(255,255,255,.08); padding-top: 2rem; }
+    .footer__col h3 { font-family:"Archivo",sans-serif; font-weight: 800; font-size: .75rem; text-transform: uppercase; letter-spacing:.14em; color: var(--light-2); margin-bottom: 1rem; }
+    .footer__col a, .footer__col li { display: block; font-size: 1.875rem; font-family:"Archivo",sans-serif; font-weight: 800; line-height: 1.35; color: var(--ink); transition: color var(--dur) var(--ease); }
+    .footer__col.small a, .footer__col.small li { font-size: 1rem; font-weight: 500; color: var(--light-2); }
+    .footer__col a:hover { color: var(--accent); }
+    .footer__legal { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 3rem; flex-wrap: wrap; color: var(--light-2); font-size: .85rem; }
+    .footer__legal .tag { color: var(--accent-off); font-family:"Archivo",sans-serif; font-weight: 800; letter-spacing:.06em; }
+
+    /* ===================================================================
+       Scroll-reveal base (JS animates via GSAP; content visible if JS fails)
+       =================================================================== */
+    /* No default opacity:0 here — GSAP sets the from-state so no-JS keeps content visible */
+
+    /* ===================================================================
+       RESPONSIVE
+       =================================================================== */
+    @media (max-width: 900px) {
+      .helmet-grid { grid-template-columns: repeat(2, 1fr); }
+      .split__grid { grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+      .footer__grid { grid-template-columns: 1fr; }
+      .footer__col a, .footer__col li { font-size: 1.4rem; }
+    }
+    @media (max-width: 720px) {
+      .nav__links { display: none; }
+      .nav__toggle { display: inline-flex; align-items: center; justify-content: center; }
+      .nav__links.is-open {
+        display: flex; flex-direction: column; align-items: flex-start; gap: .25rem;
+        position: absolute; top: 100%; right: 0; left: 0;
+        background: rgba(35,38,28,.98); backdrop-filter: blur(16px);
+        padding: 1rem var(--pad-x); border-bottom: 1px solid rgba(200,255,30,.22);
+      }
+      .hero__foot { flex-direction: column; align-items: flex-start; }
+      .hero__sig { align-self: flex-end; }
+    }
+
+    /* ===================================================================
+       REDUCED MOTION — disable all non-essential motion
+       =================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal-line > * { transform: none !important; }
+      .marquee__track, .partners .marquee__track { animation: none !important; }
+    }
+
+    /* Touch devices: gate hover-only transforms */
+    @media (hover: none) {
+      .helmet-card:hover .hh-hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= NAV ================= -->
+  <nav class="nav">
+    <a class="nav__brand" href="#home" aria-label="Kai Voss Startseite">
+      <svg class="kv-mono" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Kai Voss</span>
+    </a>
+    <div class="nav__links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#karriere">Karriere</a>
+      <a href="#helme">Helme</a>
+      <a href="#kalender">Kalender</a>
+      <a class="pill" href="#store">Store</a>
+    </div>
+    <button class="nav__toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <header class="hero" id="home">
+    <div class="hero__inner">
+      <div class="hero__eyebrow-wrap marquee">
+        <div class="marquee__track">
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+          <span class="eyebrow">formel one · seit 2019</span>
+        </div>
+      </div>
+
+      <h1 class="display">
+        <span class="reveal-line rl-1"><span>KAI</span></span>
+        <span class="reveal-line rl-2"><span>VOSS</span></span>
+      </h1>
+      <span class="reveal-line rl-3"><span class="hero__sub">Formel-1-Fahrer · Saison 2026</span></span>
+
+      <div class="hero__foot">
+        <div class="reveal-line rl-4" style="overflow:visible">
+          <div class="next-race" id="kalender">
+            <span class="eyebrow">Nächstes Rennen</span>
+            <div class="next-race__name">Silverstone GP</div>
+            <div class="next-race__date">05. Juli 2026 · 15:00 MESZ</div>
+          </div>
+        </div>
+        <div class="reveal-line rl-5" style="overflow:visible">
+          <svg class="hero__sig" viewBox="0 0 200 70" fill="none" aria-hidden="true">
+            <path d="M8 58 C 40 10, 55 62, 78 26 C 92 6, 100 60, 120 34 C 140 12, 150 58, 172 24 C 182 12, 190 30, 194 20" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= TASK 3 — STATEMENT ================= -->
+  <section class="section statement">
+    <div class="container">
+      <p class="eyebrow" style="margin-bottom:1.5rem">eine nachricht von kai</p>
+      <p class="statement__text" id="statementText">
+        <span class="word">Ich</span> <span class="word">fahre,</span> <span class="word">um</span>
+        <span class="word"><em class="hl">Grenzen</em></span> <span class="word">zu</span> <span class="word">verschieben,</span>
+        <span class="word">für</span> <span class="word"><strong class="hl">jeden</strong></span> <span class="word"><strong class="hl">Sieg</strong></span> <span class="word">zu</span> <span class="word">kämpfen</span>
+        <span class="word">und</span> <span class="word">ein</span> <span class="word"><em class="hl">Vermächtnis</em></span> <span class="word">aufzubauen</span> <span class="word">—</span>
+        <span class="word">auf</span> <span class="word">und</span> <span class="word">neben</span> <span class="word">der</span> <span class="word">Strecke.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= TASK 4 — HORIZONTAL GALLERY ================= -->
+  <section class="section gallery" id="karriere">
+    <div class="container">
+      <div class="gallery__head">
+        <h2 class="display">Momente</h2>
+        <p class="eyebrow">scrollen zum durchfahren →</p>
+      </div>
+    </div>
+    <div class="pin-wrap" id="pinWrap">
+      <div class="track" id="track">
+        <article class="card">
+          <div class="card__media grade-1"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Monaco, 2024</span></div>
+        </article>
+
+        <article class="card">
+          <div class="card__media grade-2"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Silverstone, 2025</span></div>
+          <svg class="card__sig" viewBox="0 0 200 70" fill="none" aria-hidden="true">
+            <path d="M8 58 C 40 10, 55 62, 78 26 C 92 6, 100 60, 120 34 C 140 12, 150 58, 172 24 C 182 12, 190 30, 194 20" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+          </svg>
+        </article>
+
+        <article class="card card--quote">
+          <blockquote>Es zählt nicht, wo du <em class="hl">startest</em> — sondern wie du dich <em class="hl">entwickelst.</em></blockquote>
+          <footer class="eyebrow">— Kai Voss</footer>
+        </article>
+
+        <article class="card">
+          <div class="card__media grade-3"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Katar, 2024</span></div>
+        </article>
+
+        <article class="card card--stat">
+          <div class="stat__num">1.</div>
+          <div class="stat__label">Podium 2020</div>
+        </article>
+
+        <article class="card">
+          <div class="card__media grade-4"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Barcelona, 2023</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TASK 5 — SPLIT SECTIONS ================= -->
+  <section class="section split">
+    <div class="container">
+      <div class="split__block">
+        <div class="split__grid">
+          <div class="word-pair">
+            <span class="big">AUF</span>
+            <span class="mid">der</span>
+            <span class="big">STRECKE</span>
+          </div>
+          <div>
+            <p class="split__desc">Jede Runde ist ein Duell mit der <strong class="hl" style="color:var(--accent-off)">Millisekunde.</strong> Präzision, Mut und ein kühler Kopf bei 320 km/h.</p>
+            <a class="split__link" href="#karriere">Karriere ansehen
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="split__block">
+        <div class="split__grid">
+          <div class="word-pair">
+            <span class="big">NEBEN</span>
+            <span class="mid">der</span>
+            <span class="big">STRECKE</span>
+          </div>
+          <div>
+            <p class="split__desc">Abseits des Cockpits zählt <strong class="hl" style="color:var(--accent-off)">Haltung.</strong> Nachwuchsförderung, Design und ein Team, das an dieselbe Vision glaubt.</p>
+            <a class="split__link" href="#store">Zur Kollektion
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TASK 6 — HELM-GRID ================= -->
+  <section class="section helmets" id="helme">
+    <div class="container">
+      <div class="helmets__head">
+        <h2 class="display">Helm-Archiv</h2>
+        <p class="eyebrow">acht designs · 2019 – 2026</p>
+      </div>
+      <div class="helmet-grid" id="helmetGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================= TASK 7 — STORE CTA ================= -->
+  <section class="section store-cta" id="store">
+    <div class="container store-cta__inner">
+      <h2 class="display">KV Kollektion<span class="dot">.</span></h2>
+      <p>Renn-DNA für den Alltag. Limitierte Stückzahl, kompromisslos gemacht.</p>
+      <a class="btn-dark" href="#store" aria-label="Zum Store (Demo)">Zum Store</a>
+    </div>
+  </section>
+
+  <!-- ================= TASK 8 — PARTNERS + FOOTER ================= -->
+  <section class="partners">
+    <div class="marquee">
+      <div class="marquee__track">
+        <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA ENERGY</span><span class="wordmark">NORDBANK</span><span class="wordmark">KELVIN &amp; ROSS</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA AUDIO</span><span class="wordmark">MERIDIAN</span><span class="wordmark">STRØM</span>
+        <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA ENERGY</span><span class="wordmark">NORDBANK</span><span class="wordmark">KELVIN &amp; ROSS</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA AUDIO</span><span class="wordmark">MERIDIAN</span><span class="wordmark">STRØM</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__statement">
+        <h2 class="display">Immer im<br>Kampfmodus.</h2>
+        <svg class="kv-mono" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+          <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div class="footer__grid">
+        <div class="footer__col">
+          <h3>Navigation</h3>
+          <a href="#home">Home</a>
+          <a href="#karriere">Karriere</a>
+          <a href="#helme">Helme</a>
+          <a href="#kalender">Kalender</a>
+        </div>
+        <div class="footer__col small">
+          <h3>Social</h3>
+          <a href="#store">Instagram</a>
+          <a href="#store">YouTube</a>
+          <a href="#store">TikTok</a>
+          <a href="#store">X / Twitter</a>
+        </div>
+        <div class="footer__col small">
+          <h3>Store</h3>
+          <a href="#store">KV Kollektion</a>
+          <a href="#store">Caps</a>
+          <a href="#store">Team-Wear</a>
+        </div>
+      </div>
+
+      <div class="footer__legal">
+        <span>© 2026 Kai Voss · Demo von Oddomode. Fiktive Person.</span>
+        <span class="tag">Odd by design.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= LIBS (CDN only) ================= -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ---- Helmet cards (Task 6): build 8 cards with base + hover SVG ---- */
+      var helmets = [
+        { name: "Season", year: "2019" },
+        { name: "Chrome", year: "2020" },
+        { name: "Nightfall", year: "2021" },
+        { name: "Beachball", year: "2022" },
+        { name: "Ember", year: "2023" },
+        { name: "Frost", year: "2024" },
+        { name: "Circuit", year: "2025" },
+        { name: "Apex", year: "2026" }
+      ];
+      function helmetSVG(cls, fill, stroke, visor) {
+        // simplified helmet silhouette path
+        return '<svg class="' + cls + '" viewBox="0 0 120 120" fill="none" aria-hidden="true">' +
+          '<path d="M60 22 C34 22 20 42 20 66 C20 78 24 88 32 94 L96 94 C104 86 100 60 100 60 C100 38 86 22 60 22 Z" fill="' + fill + '" stroke="' + stroke + '" stroke-width="3"/>' +
+          '<path d="M34 62 C40 52 54 48 72 50 C88 52 96 58 96 60 L92 78 C74 74 52 74 36 80 Z" fill="' + visor + '"/>' +
+          '<path d="M32 94 L100 94 L104 104 L34 104 Z" fill="' + stroke + '"/>' +
+          '</svg>';
+      }
+      var grid = document.getElementById("helmetGrid");
+      if (grid) {
+        helmets.forEach(function (h) {
+          var el = document.createElement("article");
+          el.className = "helmet-card";
+          el.innerHTML =
+            '<div class="helmet-card__art">' +
+              helmetSVG("hh-base", "#4e4f49", "#5c5d55", "#2b2d26") +
+              helmetSVG("hh-hover", "#c8ff1e", "#a8bd3a", "#23261c") +
+            '</div>' +
+            '<div class="helmet-card__meta"><span class="name">' + h.name + '</span><span class="eyebrow">' + h.year + '</span></div>';
+          grid.appendChild(el);
+        });
+      }
+
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var hasGSAP = typeof window.gsap !== "undefined";
+      var hasST = hasGSAP && typeof window.ScrollTrigger !== "undefined";
+
+      /* ---- Mobile nav toggle ---- */
+      var toggle = document.getElementById("navToggle");
+      var links = document.getElementById("navLinks");
+      if (toggle && links) {
+        toggle.addEventListener("click", function () {
+          var open = links.classList.toggle("is-open");
+          toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        links.addEventListener("click", function (e) {
+          if (e.target.tagName === "A") {
+            links.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      /* ---- TASK 9 — Lenis wired to GSAP ticker ---- */
+      var lenis = null;
+      if (!reduce && typeof window.Lenis !== "undefined") {
+        lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
+        if (hasGSAP) {
+          window.gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+          window.gsap.ticker.lagSmoothing(0);
+        } else {
+          function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+          requestAnimationFrame(raf);
+        }
+      }
+
+      /* Anchor links via Lenis (fallback to native smooth) */
+      document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.addEventListener("click", function (e) {
+          var id = a.getAttribute("href");
+          if (id.length < 2) return;
+          var target = document.querySelector(id);
+          if (!target) return;
+          e.preventDefault();
+          if (lenis) lenis.scrollTo(target, { offset: -70 });
+          else target.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+        });
+      });
+
+      if (!hasGSAP) return; // content already visible; no reveal state applied
+
+      window.gsap.registerPlugin(window.ScrollTrigger);
+
+      if (reduce) { return; } // skip all scroll motion under reduced-motion
+
+      /* ---- Global scroll reveals for headings ---- */
+      window.gsap.utils.toArray(".gallery__head, .helmets__head, .store-cta__inner, .footer__statement, .split__block").forEach(function (el) {
+        window.gsap.from(el, {
+          y: 30, opacity: 0, duration: 0.75, ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 85%", once: true }
+        });
+      });
+
+      /* ---- TASK 3 — statement word reveal (scrub) ---- */
+      var words = window.gsap.utils.toArray("#statementText .word");
+      if (words.length) {
+        window.gsap.set(words, { opacity: 0.18 });
+        window.gsap.to(words, {
+          opacity: 1, stagger: 0.5, ease: "none",
+          scrollTrigger: { trigger: "#statementText", start: "top 75%", end: "bottom 55%", scrub: true }
+        });
+      }
+
+      /* ---- TASK 4 — horizontal pinned gallery ---- */
+      var track = document.getElementById("track");
+      var pinWrap = document.getElementById("pinWrap");
+      if (track && pinWrap) {
+        document.documentElement.classList.add("gallery-pinned");
+        var getScrollAmount = function () { return track.scrollWidth - window.innerWidth; };
+        var tween = window.gsap.to(track, {
+          x: function () { return -getScrollAmount(); },
+          ease: "none"
+        });
+        window.ScrollTrigger.create({
+          trigger: pinWrap,
+          start: "top top",
+          end: function () { return "+=" + getScrollAmount(); },
+          pin: true,
+          scrub: 1,
+          animation: tween,
+          invalidateOnRefresh: true
+        });
+
+        /* subtle parallax on gallery cards */
+        window.gsap.utils.toArray(".card").forEach(function (card, i) {
+          window.gsap.fromTo(card, { y: 40 }, {
+            y: -40, ease: "none",
+            scrollTrigger: {
+              trigger: pinWrap, start: "top top",
+              end: function () { return "+=" + getScrollAmount(); },
+              scrub: 1, containerAnimation: tween
+            }
+          });
+        });
+      }
+
+      /* ---- TASK 6 — staggered helmet reveal ---- */
+      var cards = window.gsap.utils.toArray(".helmet-card");
+      if (cards.length) {
+        window.gsap.from(cards, {
+          y: 30, opacity: 0, duration: 0.6, ease: "power3.out",
+          stagger: 0.08,
+          clearProps: "transform",
+          scrollTrigger: { trigger: "#helmetGrid", start: "top 85%", once: true }
+        });
+      }
+
+      window.addEventListener("load", function () { window.ScrollTrigger.refresh(); });
+    })();
+  </script>
+</body>
+</html>
