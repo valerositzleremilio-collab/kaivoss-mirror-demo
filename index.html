@@ -107,6 +107,39 @@
     .kv-mono { display: inline-block; color: var(--accent); }
 
     /* ===================================================================
+       TASK 1 — INTRO PRELOADER + SLIDE-OUT LEFT
+       Mirror of landonorris.com load overlay: full-screen accent field,
+       centered KV monogram, bottom "LOAD KV" label + real progress bar,
+       whole overlay slides out to the LEFT on ready. Measured ref values:
+       ease cubic-bezier(.65,.05,0,1), dur .75s → we use our --ease.
+       Hard-capped ≤ 1s total; runs once; reduced-motion skips it.
+       =================================================================== */
+    .intro {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      transform: translateX(0);
+      will-change: transform;
+    }
+    /* slide OUT to the left — dedicated short duration keeps total intro ≤ 1s */
+    .intro.is-out { transform: translateX(-100%); transition: transform .5s var(--ease); }
+    .intro__mono { width: clamp(84px, 11vw, 132px); height: auto; color: var(--bg-dark); }
+    .intro__mono path { stroke-dasharray: 320; stroke-dashoffset: 320; animation: introDraw .6s var(--ease) forwards; }
+    .intro__mono path:nth-child(2) { animation-delay: .12s; }
+    @keyframes introDraw { to { stroke-dashoffset: 0; } }
+    .intro__foot {
+      position: absolute; left: 0; right: 0; bottom: 2.25rem;
+      display: flex; flex-direction: column; align-items: center; gap: .85rem;
+    }
+    .intro__label {
+      font-family: "Archivo", sans-serif; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .2em; font-size: .8rem;
+      color: var(--bg-dark);
+    }
+    .intro__bar { width: min(220px, 42vw); height: 2px; background: rgba(35,38,28,.22); overflow: hidden; border-radius: 2px; }
+    .intro__bar-fill { height: 100%; width: 0; background: var(--bg-dark); transform-origin: left center; }
+
+    /* ===================================================================
        NAV
        =================================================================== */
     .nav {
@@ -264,7 +297,19 @@
     .track { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; padding: 1rem var(--pad-x); will-change: transform; }
     /* Pinned horizontal layout only when JS wires the ScrollTrigger */
     .gallery-pinned .pin-wrap { height: 100dvh; }
-    .gallery-pinned .track { flex-wrap: nowrap; height: 100%; padding-block: 0; }
+    .gallery-pinned .track { flex-wrap: nowrap; height: 100%; padding-block: 0; align-items: flex-start; gap: 0; }
+    /* Organic scatter (mirror of Norris): each card carries its own width / height /
+       vertical offset / left-gap, staggered high→low with mixed aspect ratios.
+       Vars live inline on each card; only consumed in pinned mode so the wrapped
+       no-JS / reduced-motion fallback keeps the uniform, fully-visible grid. */
+    .gallery-pinned .card {
+      flex: 0 0 var(--w, clamp(280px, 30vw, 440px));
+      height: var(--h, 60vh);
+      margin-top: var(--y, 8vh);
+      margin-left: var(--gx, clamp(1.25rem, 3vw, 3rem));
+      border-radius: var(--r-md-card, var(--r-md));
+    }
+    .gallery-pinned .card:first-child { margin-left: 0; }
     .card {
       position: relative;
       flex: 0 0 clamp(280px, 34vw, 460px);
@@ -284,6 +329,9 @@
     .grade-2 { background: radial-gradient(90% 90% at 80% 10%, #667a1f, transparent 55%), radial-gradient(60% 70% at 10% 80%, #2b3420, transparent 55%), linear-gradient(160deg, #3a3d31, #23261c); }
     .grade-3 { background: radial-gradient(70% 90% at 50% 100%, #7f9a2a, transparent 55%), radial-gradient(80% 80% at 10% 0%, #33381f, transparent 55%), linear-gradient(120deg, #30332a, #1a1d15); }
     .grade-4 { background: radial-gradient(90% 70% at 30% 90%, #556b1d, transparent 55%), radial-gradient(70% 70% at 90% 20%, #40492a, transparent 55%), linear-gradient(200deg, #383b2f, #202318); }
+    .grade-5 { background: radial-gradient(85% 85% at 70% 15%, #6f8724, transparent 55%), radial-gradient(60% 70% at 15% 90%, #2a3220, transparent 55%), linear-gradient(150deg, #34382c, #1e2116); }
+    .grade-6 { background: radial-gradient(75% 85% at 25% 85%, #48591c, transparent 55%), radial-gradient(80% 75% at 85% 10%, #3a4327, transparent 55%), linear-gradient(220deg, #363930, #1c1f15); }
+    .grade-7 { background: radial-gradient(80% 90% at 50% 0%, #86a32e, transparent 58%), radial-gradient(70% 70% at 10% 100%, #2e3620, transparent 55%), linear-gradient(130deg, #32352b, #191c14); }
 
     .card--quote, .card--stat { display: flex; flex-direction: column; justify-content: center; padding: 2.5rem; }
     .card--quote { background: var(--surface-1); border: 1px solid rgba(200,255,30,.18); }
@@ -298,24 +346,67 @@
     /* ===================================================================
        TASK 5 — SPLIT SECTIONS (light rhythm break)
        =================================================================== */
-    .split { background: var(--light); color: var(--bg-dark); }
-    .split__block { padding-block: 2rem; border-top: 1px solid rgba(35,38,28,.14); }
-    .split__block:first-of-type { border-top: 0; }
-    .split__grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 2rem; align-items: end; }
-    .word-pair { line-height: .86; }
-    .word-pair .big {
-      display: block;
-      font-family: "Archivo Expanded","Archivo",sans-serif;
-      font-weight: 900;
-      font-size: var(--t-impact);
-      -webkit-text-stroke: 2px var(--bg-dark);
-      color: transparent;
-      transition: color var(--dur) var(--ease), -webkit-text-stroke-color var(--dur) var(--ease);
+    .split { background: var(--light); color: var(--bg-dark); overflow: hidden; }
+    /* Centered stage: two portraits flank the middle, the ON/OFF-style word-pair
+       overlays center with an accent script word on top, sub-CTAs below.
+       Everything animates IN from the edges on scroll (see JS). Default CSS = the
+       final, settled state so it stays readable with JS off / reduced-motion. */
+    .split__stage {
+      position: relative;
+      min-height: 100dvh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding-block: var(--pad-y);
     }
-    .word-pair .mid { display: inline-block; font-size: var(--t-eyebrow); font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--surface-2); margin: .2rem 0; }
-    .split__block:hover .word-pair .big { color: var(--accent-off); -webkit-text-stroke-color: var(--accent-off); }
-    .split__desc { font-size: var(--t-reg); line-height: 1.2; max-width: 30ch; }
-    .split__link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; }
+    .split__eyebrow { color: var(--surface-2); margin-bottom: 2.25rem; }
+
+    /* Converging CSS-art portraits (tall, mirror of Norris's ±edge → center entry) */
+    .split__portrait {
+      position: absolute; top: 50%; z-index: 1;
+      width: clamp(150px, 15vw, 230px);
+      height: clamp(320px, 56vh, 560px);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      transform: translateY(-50%);
+      box-shadow: 0 30px 80px -30px rgba(35,38,28,.45);
+      will-change: transform;
+    }
+    .split__portrait.is-left  { left: clamp(1rem, 7vw, 11rem); }
+    .split__portrait.is-right { right: clamp(1rem, 7vw, 11rem); }
+    .split__portrait .pmedia { position: absolute; inset: 0; }
+    .split__portrait::after { content: ""; position: absolute; inset: 0; background-image: var(--grain); opacity: .1; mix-blend-mode: overlay; }
+    .split__portrait .pv { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 0%, transparent 40%, rgba(0,0,0,.42)); }
+    .split__portrait .pmono { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(200,255,30,.16); }
+    .split__portrait .pmono svg { width: 54%; height: auto; }
+
+    /* Centered word-pair overlay */
+    .split__words { position: relative; z-index: 2; }
+    .split__script {
+      display: block;
+      font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900; font-style: italic;
+      color: var(--accent-off);
+      font-size: clamp(1.5rem, 3.4vw, 2.6rem);
+      letter-spacing: .01em;
+      transform: rotate(-4deg);
+      margin-bottom: -.34em;
+      will-change: transform, opacity;
+    }
+    .split__pair { line-height: .82; }
+    .split__pair .big {
+      display: block;
+      font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900;
+      font-size: var(--t-impact);
+      color: var(--bg-dark);
+      letter-spacing: -.01em;
+      will-change: transform, opacity;
+    }
+    .split__pair .big.is-out { -webkit-text-stroke: 2px var(--bg-dark); color: transparent; }
+
+    /* sub-CTAs */
+    .split__ctas { position: relative; z-index: 2; display: flex; gap: 2.5rem 3.5rem; margin-top: 3rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
+    .split__cta { max-width: 320px; }
+    .split__cta p { font-size: 1rem; line-height: 1.4; color: var(--surface-2); }
+    .split__link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; color: var(--bg-dark); }
     .split__link svg { transition: transform var(--dur) var(--ease); }
     .split__link:hover svg { transform: translateX(6px); }
 
@@ -400,7 +491,9 @@
        =================================================================== */
     @media (max-width: 900px) {
       .helmet-grid { grid-template-columns: repeat(2, 1fr); }
-      .split__grid { grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+      .split__portrait { width: clamp(110px, 13vw, 150px); }
+      .split__portrait.is-left { left: 1rem; }
+      .split__portrait.is-right { right: 1rem; }
       .footer__grid { grid-template-columns: 1fr; }
       .footer__col a, .footer__col li { font-size: 1.4rem; }
     }
@@ -415,6 +508,9 @@
       }
       .hero__foot { flex-direction: column; align-items: flex-start; }
       .hero__sig { align-self: flex-end; }
+      /* Decorative portraits would collide with the centered words on phones */
+      .split__portrait { display: none; }
+      .split__ctas { flex-direction: column; align-items: center; margin-top: 2rem; }
     }
 
     /* ===================================================================
@@ -438,6 +534,18 @@
   </style>
 </head>
 <body>
+
+  <!-- ================= TASK 1 — INTRO PRELOADER ================= -->
+  <div class="intro" id="intro" role="presentation" aria-hidden="true">
+    <svg class="intro__mono" viewBox="0 0 100 100" fill="none">
+      <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="intro__foot">
+      <span class="intro__label">Load KV</span>
+      <div class="intro__bar"><div class="intro__bar-fill" id="introFill"></div></div>
+    </div>
+  </div>
 
   <!-- ================= NAV ================= -->
   <nav class="nav">
@@ -532,78 +640,122 @@
     </div>
     <div class="pin-wrap" id="pinWrap">
       <div class="track" id="track">
-        <article class="card">
+        <!-- Portrait, anchored high -->
+        <article class="card" style="--w:clamp(180px,17vw,240px); --h:46vh; --y:8vh; --gx:0">
           <div class="card__media grade-1"></div>
           <div class="card__vignette"></div>
-          <div class="card__caption"><span class="eyebrow">Monaco, 2024</span></div>
+          <div class="card__caption"><span class="eyebrow">Monaco · 2024</span></div>
         </article>
 
-        <article class="card">
+        <!-- Big landscape hero moment + signature, top-anchored -->
+        <article class="card" style="--w:clamp(360px,40vw,600px); --h:66vh; --y:5vh; --gx:clamp(1.5rem,3vw,3rem)">
           <div class="card__media grade-2"></div>
           <div class="card__vignette"></div>
-          <div class="card__caption"><span class="eyebrow">Silverstone, 2025</span></div>
+          <div class="card__caption"><span class="eyebrow">Silverstone · 2025</span></div>
           <svg class="card__sig" viewBox="0 0 200 70" fill="none" aria-hidden="true">
             <path d="M8 58 C 40 10, 55 62, 78 26 C 92 6, 100 60, 120 34 C 140 12, 150 58, 172 24 C 182 12, 190 30, 194 20" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
           </svg>
         </article>
 
-        <article class="card card--quote">
+        <!-- Small portrait, mid -->
+        <article class="card" style="--w:clamp(150px,14vw,200px); --h:32vh; --y:22vh; --gx:clamp(1rem,2.4vw,2.2rem)">
+          <div class="card__media grade-3"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Katar · 2024</span></div>
+        </article>
+
+        <!-- Interspersed quote card, dropped low (text-callout rhythm) -->
+        <article class="card card--quote" style="--w:clamp(300px,30vw,440px); --h:34vh; --y:46vh; --gx:clamp(2rem,5vw,4rem)">
           <blockquote>Es zählt nicht, wo du <em class="hl">startest</em> — sondern wie du dich <em class="hl">entwickelst.</em></blockquote>
           <footer class="eyebrow">— Kai Voss</footer>
         </article>
 
-        <article class="card">
-          <div class="card__media grade-3"></div>
+        <!-- Big square moment, high -->
+        <article class="card" style="--w:clamp(320px,30vw,460px); --h:58vh; --y:12vh; --gx:clamp(1.5rem,3vw,3rem)">
+          <div class="card__media grade-5"></div>
           <div class="card__vignette"></div>
-          <div class="card__caption"><span class="eyebrow">Katar, 2024</span></div>
+          <div class="card__caption"><span class="eyebrow">Spa · 2024</span></div>
         </article>
 
-        <article class="card card--stat">
+        <!-- Accent stat card, dropped low -->
+        <article class="card card--stat" style="--w:clamp(220px,22vw,320px); --h:40vh; --y:34vh; --gx:clamp(1.25rem,3vw,3rem)">
           <div class="stat__num">1.</div>
           <div class="stat__label">Podium 2020</div>
         </article>
 
-        <article class="card">
+        <!-- Portrait, mid-high -->
+        <article class="card" style="--w:clamp(180px,18vw,250px); --h:44vh; --y:16vh; --gx:clamp(2rem,5vw,4rem)">
           <div class="card__media grade-4"></div>
           <div class="card__vignette"></div>
-          <div class="card__caption"><span class="eyebrow">Barcelona, 2023</span></div>
+          <div class="card__caption"><span class="eyebrow">Barcelona · 2023</span></div>
+        </article>
+
+        <!-- Small portrait, very low -->
+        <article class="card" style="--w:clamp(150px,14vw,200px); --h:30vh; --y:44vh; --gx:clamp(1rem,2.4vw,2.2rem)">
+          <div class="card__media grade-6"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Suzuka · 2025</span></div>
+        </article>
+
+        <!-- Big square finale, high -->
+        <article class="card" style="--w:clamp(300px,28vw,440px); --h:64vh; --y:6vh; --gx:clamp(1.5rem,4vw,3.5rem)">
+          <div class="card__media grade-7"></div>
+          <div class="card__vignette"></div>
+          <div class="card__caption"><span class="eyebrow">Abu Dhabi · 2025</span></div>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- ================= TASK 5 — SPLIT SECTIONS ================= -->
-  <section class="section split">
-    <div class="container">
-      <div class="split__block">
-        <div class="split__grid">
-          <div class="word-pair">
-            <span class="big">AUF</span>
-            <span class="mid">der</span>
-            <span class="big">STRECKE</span>
-          </div>
-          <div>
-            <p class="split__desc">Jede Runde ist ein Duell mit der <strong class="hl" style="color:var(--accent-off)">Millisekunde.</strong> Präzision, Mut und ein kühler Kopf bei 320 km/h.</p>
-            <a class="split__link" href="#karriere">Karriere ansehen
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-          </div>
+  <!-- ================= TASK 3 — POST-GALLERY SPLIT ENTRY (Norris ON/OFF mirror) ================= -->
+  <section class="section split" id="split">
+    <div class="container split__stage">
+      <span class="eyebrow split__eyebrow">auf &amp; neben der strecke</span>
+
+      <!-- Two CSS-art portraits enter from the ± edges toward center (JS-driven) -->
+      <div class="split__portrait is-left" id="splitLeft" aria-hidden="true">
+        <div class="pmedia grade-3"></div>
+        <div class="pv"></div>
+        <div class="pmono">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="split__portrait is-right" id="splitRight" aria-hidden="true">
+        <div class="pmedia grade-5"></div>
+        <div class="pv"></div>
+        <div class="pmono">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
       </div>
 
-      <div class="split__block">
-        <div class="split__grid">
-          <div class="word-pair">
-            <span class="big">NEBEN</span>
-            <span class="mid">der</span>
-            <span class="big">STRECKE</span>
-          </div>
-          <div>
-            <p class="split__desc">Abseits des Cockpits zählt <strong class="hl" style="color:var(--accent-off)">Haltung.</strong> Nachwuchsförderung, Design und ein Team, das an dieselbe Vision glaubt.</p>
-            <a class="split__link" href="#store">Zur Kollektion
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-          </div>
+      <!-- Centered word-pair: accent script on top, AUF (filled) / NEBEN (outline) -->
+      <div class="split__words">
+        <span class="split__script" id="splitScript">der Strecke</span>
+        <div class="split__pair display">
+          <span class="big" id="wordAuf">AUF</span>
+          <span class="big is-out" id="wordNeben">NEBEN</span>
+        </div>
+      </div>
+
+      <!-- Sub-CTAs (enter last) — our copy preserved -->
+      <div class="split__ctas" id="splitCtas">
+        <div class="split__cta">
+          <p>Jede Runde ist ein Duell mit der <strong class="hl" style="color:var(--accent-off)">Millisekunde.</strong> Präzision, Mut und ein kühler Kopf bei 320 km/h.</p>
+          <a class="split__link" href="#karriere">Karriere ansehen
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+        <div class="split__cta">
+          <p>Abseits des Cockpits zählt <strong class="hl" style="color:var(--accent-off)">Haltung.</strong> Nachwuchsförderung, Design und ein Team, das an dieselbe Vision glaubt.</p>
+          <a class="split__link" href="#store">Zur Kollektion
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
       </div>
     </div>
@@ -726,6 +878,49 @@
       var hasGSAP = typeof window.gsap !== "undefined";
       var hasST = hasGSAP && typeof window.ScrollTrigger !== "undefined";
 
+      /* ---- TASK 1 — Intro preloader + slide-out-left ----
+         Real progress bar (rAF-driven, completes on window.load or at the cap,
+         whichever first), then the whole overlay slides out to the LEFT.
+         Total intro hard-capped ≤ 1s. Reduced-motion removes it instantly. */
+      (function () {
+        var intro = document.getElementById("intro");
+        var fill = document.getElementById("introFill");
+        if (!intro) return;
+        var removeIntro = function () { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); };
+        if (reduce) { removeIntro(); return; }
+
+        var start = performance.now();
+        var FILL_MS = 620;   // progress window (~0.6s) — no fake delay
+        var CAP_MS = 950;    // absolute safety cap for whole intro
+        var finished = false;
+
+        var slideOut = function () {
+          if (finished) return;
+          finished = true;
+          fill.style.width = "100%";
+          intro.classList.add("is-out");
+          var done = false;
+          var cleanup = function () { if (done) return; done = true; removeIntro(); };
+          intro.addEventListener("transitionend", cleanup, { once: true });
+          setTimeout(cleanup, 560); // matches .5s slide + buffer
+        };
+
+        var tick = function (now) {
+          var t = Math.min(1, (now - start) / FILL_MS);
+          fill.style.width = (t * 100).toFixed(1) + "%";
+          if (t < 1 && !finished) requestAnimationFrame(tick);
+          else slideOut();
+        };
+        requestAnimationFrame(tick);
+
+        // If assets finish loading after a sensible minimum, complete early.
+        window.addEventListener("load", function () {
+          if (performance.now() - start > 380) slideOut();
+        });
+        // Absolute cap — never let the intro linger.
+        setTimeout(slideOut, CAP_MS);
+      })();
+
       /* ---- Mobile nav toggle ---- */
       var toggle = document.getElementById("navToggle");
       var links = document.getElementById("navLinks");
@@ -806,7 +1001,7 @@
       }
 
       /* ---- Global scroll reveals for headings ---- */
-      window.gsap.utils.toArray(".gallery__head, .helmets__head, .store-cta__inner, .footer__statement, .split__block").forEach(function (el) {
+      window.gsap.utils.toArray(".gallery__head, .helmets__head, .store-cta__inner, .footer__statement").forEach(function (el) {
         window.gsap.from(el, {
           y: 30, opacity: 0, duration: 0.75, ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 85%", once: true }
@@ -854,6 +1049,28 @@
             }
           });
         });
+      }
+
+      /* ---- TASK 3 — post-gallery split pull-in ----
+         Portraits translate in from the ± edges toward center, the AUF / NEBEN
+         words migrate inward from outside, the accent script settles, then the
+         sub-CTAs rise in. Scrubbed to scroll; measured on Norris (±~18vw travel,
+         our single --ease). Reduced-motion / no-JS keeps the settled CSS state. */
+      var splitStage = document.querySelector(".split__stage");
+      if (splitStage) {
+        var vw = function () { return window.innerWidth; };
+        var stl = window.gsap.timeline({
+          scrollTrigger: {
+            trigger: ".split", start: "top 85%", end: "top 25%",
+            scrub: 0.6, invalidateOnRefresh: true
+          }
+        });
+        stl.fromTo("#splitLeft",  { x: function () { return -vw() * 0.75; } }, { x: 0, ease: "none" }, 0)
+           .fromTo("#splitRight", { x: function () { return  vw() * 0.75; } }, { x: 0, ease: "none" }, 0)
+           .fromTo("#wordAuf",    { x: function () { return -vw() * 0.18; }, autoAlpha: 0.15 }, { x: 0, autoAlpha: 1, ease: "none" }, 0.05)
+           .fromTo("#wordNeben",  { x: function () { return  vw() * 0.18; }, autoAlpha: 0.15 }, { x: 0, autoAlpha: 1, ease: "none" }, 0.05)
+           .fromTo("#splitScript", { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "none" }, 0.22)
+           .fromTo("#splitCtas",   { y: 32, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "none" }, 0.55);
       }
 
       /* ---- TASK 6 — staggered helmet reveal ---- */
