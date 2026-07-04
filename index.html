@@ -9,7 +9,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Archivo+Expanded:wght@800;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,600..900;1,6..96,500..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Archivo+Expanded:wght@800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet" />
 
   <style>
     /* ===================================================================
@@ -43,7 +43,7 @@
       /* Spacing derived from one gap */
       --gap: 1.25rem;
       --pad-x: 2rem;
-      --pad-y: calc(3.5rem + var(--gap) * 2);
+      --pad-y: calc(2.25rem + var(--gap)); /* v3-2 tightened from 3.5rem+gap*2 */
 
       /* Radius family */
       --r-sm: 1rem;
@@ -84,9 +84,9 @@
     }
     /* Second display family (D1): high-contrast fashion serif for brand/emotional words,
        mixed INSIDE grotesk headlines (D2). Accent-coloured when it carries the emphasis. */
-    .serif { font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; letter-spacing: 0; }
+    .serif { font-family: "Playfair Display", Georgia, serif; font-weight: 700; letter-spacing: 0; }
     .serif-i { font-style: italic; }
-    .hl-serif { font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; font-style: italic; color: var(--accent); letter-spacing: 0; }
+    .hl-serif { font-family: "Playfair Display", Georgia, serif; font-weight: 700; font-style: italic; color: var(--accent); letter-spacing: 0; }
 
     .eyebrow {
       font-family: "Archivo", sans-serif;
@@ -199,34 +199,18 @@
       background: transparent; /* reference: fully transparent, overlaps hero from y=0 — no bar, no blur */
     }
     /* legibility over hero/dark sections without a background bar */
-    .nav__logo, .nav__links a { text-shadow: 0 1px 14px rgba(0,0,0,.4); }
+    .nav__logo { text-shadow: 0 1px 14px rgba(0,0,0,.4); }
     .nav__toggle { filter: drop-shadow(0 1px 10px rgba(0,0,0,.4)); }
     /* B4 — text-color adaptation over LIGHT/ACCENT sections (store-pill stays constant lime) */
-    .nav.is-light .nav__links a { color: var(--bg-dark); text-shadow: none; }
     .nav.is-light .nav__logo { color: var(--bg-dark); text-shadow: none; }
     .nav.is-light .nav__toggle { color: var(--bg-dark); border-color: rgba(35,38,28,.4); filter: none; }
-    .nav.is-light .nav__links a:hover { color: #000; }
     /* B2 — stacked serif wordmark (2 lines) */
     .nav__brand { display: flex; align-items: center; }
     .nav__logo {
-      font-family: "Bodoni Moda", Georgia, serif; font-weight: 700;
+      font-family: "Playfair Display", Georgia, serif; font-weight: 700;
       font-size: 1.2rem; line-height: .88; letter-spacing: .01em; color: var(--ink);
     }
     .nav__actions { display: flex; align-items: center; gap: .85rem; }
-    .nav__links { display: flex; align-items: center; gap: 1.75rem; }
-    .nav__links a {
-      font-family: "Archivo", sans-serif;
-      font-weight: 500;
-      font-size: .8rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--light-2);
-      transition: color var(--dur) var(--ease);
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-    }
-    .nav__links a:not(.pill):hover { color: var(--ink); }
     /* B3 — store pill (bag icon), constant lime across all sections */
     .pill {
       display: inline-flex; align-items: center; gap: .5rem;
@@ -243,15 +227,67 @@
     .pill:hover { background: #d6ff4d; }
     .pill:active { transform: scale(0.97); }
 
-    /* B3 — outlined square menu button, visible on every breakpoint */
+    /* B3 / v3-1 — outlined square menu button that WIDENS LEFT into a labelled button on open */
     .nav__toggle {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 44px; height: 44px; background: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: flex-end; gap: .55rem;
+      width: 44px; height: 44px; padding: 0 12px; background: none; cursor: pointer;
       color: var(--ink); border: 1.5px solid rgba(242,242,234,.5); border-radius: 12px;
+      overflow: hidden; white-space: nowrap;
       transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
     }
     .nav__toggle:hover { background: rgba(242,242,234,.1); }
     .nav.is-light .nav__toggle:hover { background: rgba(35,38,28,.08); }
+    /* label sits LEFT of the icon, clipped out when the button is collapsed (no line crosses it) */
+    .nav__toggle-label {
+      font-family: "Archivo", sans-serif; font-weight: 800; font-size: .72rem;
+      text-transform: uppercase; letter-spacing: .14em;
+      opacity: 0; transform: translateX(6px);
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .nav__toggle.is-wide .nav__toggle-label { opacity: 1; transform: none; }
+    /* exactly 3 horizontal strokes — top / middle / bottom — in a fixed 20px icon zone (right) */
+    .nav__toggle-lines { position: relative; flex: 0 0 20px; width: 20px; height: 14px; }
+    .nav__toggle-lines .l { position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: currentColor; }
+    .nav__toggle-lines .l1 { top: 0; }
+    .nav__toggle-lines .l2 { top: 6px; }
+    .nav__toggle-lines .l3 { top: 12px; }
+
+    /* v3-1 — DROPDOWN PANEL (state-driven; closes only via ×). Fold-reveal via --reveal + clip-path.
+       JS-off (no .js) → panel fully open so links stay reachable; .js starts it closed. */
+    .menu-panel {
+      position: fixed; z-index: 99;
+      top: calc(.9rem + 44px + .55rem); right: var(--pad-x);
+      width: min(340px, calc(100vw - 2 * var(--pad-x)));
+      background: var(--bg-dark); color: var(--ink);
+      border: 1px solid rgba(200,255,30,.28);
+      padding: 1rem 1.15rem 1.25rem;
+      box-shadow: 0 34px 80px -34px rgba(0,0,0,.7);
+      --reveal: 1;
+      clip-path: inset(0 0 calc((1 - var(--reveal)) * 100%) 0);
+    }
+    .js .menu-panel { --reveal: 0; pointer-events: none; }
+    .js .menu-panel.is-open { pointer-events: auto; }
+    .menu-panel__close {
+      position: absolute; top: .35rem; right: .4rem;
+      width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+      background: none; border: 0; color: var(--light-2); cursor: pointer; border-radius: 8px;
+      font-family: "Archivo", sans-serif; font-size: 1.6rem; line-height: 1;
+      transition: color var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .menu-panel__close:hover { color: var(--ink); background: rgba(255,255,255,.07); }
+    .menu-panel__links { display: flex; flex-direction: column; margin-top: 1.6rem; }
+    .menu-panel__links a {
+      font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1.45rem;
+      text-transform: uppercase; letter-spacing: .01em; color: var(--ink);
+      min-height: 48px; display: flex; align-items: center; gap: .6rem;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .menu-panel__links a:last-child { border-bottom: 0; }
+    .menu-panel__links a::before { content: ""; width: 0; height: 2px; background: var(--accent); transition: width var(--dur) var(--ease); }
+    .menu-panel__links a:hover { color: var(--accent); transform: translateX(4px); }
+    .menu-panel__links a:hover::before { width: 16px; }
+    .menu-panel__meta { margin-top: 1rem; color: var(--light-2); }
 
     /* ===================================================================
        TASK 2 — HERO
@@ -303,7 +339,7 @@
     .hero__band .bw { font-family:"Archivo Expanded","Archivo",sans-serif; font-weight:900; font-size:clamp(3.4rem,12vw,9rem); line-height:.98; white-space:nowrap; padding-right:2.5rem; letter-spacing:-.02em; text-transform:uppercase; }
     .hero__band .band-line-1 .bw { color:var(--accent); }
     .hero__band .band-line-2 .bw { color:var(--ink); }
-    .hero__band .band-line-2 .bw.serif { font-family:"Bodoni Moda",Georgia,serif; font-weight:800; font-style:italic; text-transform:none; }
+    .hero__band .band-line-2 .bw.serif { font-family:"Playfair Display",Georgia,serif; font-weight:800; font-style:italic; text-transform:none; }
 
     /* Marquee eyebrow */
     .marquee {
@@ -376,7 +412,7 @@
     .statement__text .word { display: inline-block; }
     em.hl { font-style: normal; color: var(--accent); }
     /* D2 — serif emphasis word mixed inside the grotesk headline */
-    .statement__text em.hl-serif { font-family: "Bodoni Moda", Georgia, serif; font-style: italic; font-weight: 700; color: var(--accent); letter-spacing: 0; }
+    .statement__text em.hl-serif { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-weight: 700; color: var(--accent); letter-spacing: 0; }
     strong.hl { color: var(--ink); font-weight: 900; }
 
     /* ===================================================================
@@ -464,7 +500,7 @@
       position: absolute; top: 50%; z-index: 1;
       width: clamp(150px, 15vw, 230px);
       height: clamp(320px, 56vh, 560px);
-      border-radius: var(--r-md);
+      border-radius: 0; /* v3-7 — sharp */
       overflow: hidden;
       transform: translateY(-50%);
       box-shadow: 0 30px 80px -30px rgba(35,38,28,.45);
@@ -482,7 +518,7 @@
     .split__words { position: relative; z-index: 2; }
     .split__script {
       display: block;
-      font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; font-style: italic;
+      font-family: "Playfair Display", Georgia, serif; font-weight: 700; font-style: italic;
       color: var(--accent-off);
       font-size: clamp(1.7rem, 4vw, 3rem);
       letter-spacing: 0;
@@ -529,7 +565,7 @@
        TASK 6 — HELM-GRID
        =================================================================== */
     .helmets { background: var(--bg-dark); }
-    .helmets__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .helmets__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .helmets__head h2 { font-size: var(--t-h1); }
     .helmet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); align-items: start; }
     /* G1 — staggered columns: 1 & 3 high, 2 & 4 dropped lower (pronounced) */
@@ -585,7 +621,7 @@
        =================================================================== */
     /* ---- H2 — PARTNERS / COLLABS (light section) ---- */
     .partners-full { background: var(--light); color: var(--bg-dark); padding-block: var(--pad-y); }
-    .partners-full__head { text-align: center; margin-bottom: 2.5rem; }
+    .partners-full__head { text-align: center; margin-bottom: 1.5rem; }
     .partners-full__head .eyebrow { color: var(--surface-2); display: block; margin-bottom: 1rem; }
     .partners-full__head h2 { font-size: var(--t-h1); }
     .partners-full__word { color: var(--accent-off); }
@@ -601,31 +637,32 @@
 
     /* ---- H3 — SOCIALS FAN-OUT ---- */
     /* padding-top clears the fixed nav; padding-bottom + fan height keep the whole fan un-clipped */
-    .socials { background: var(--light); color: var(--bg-dark); text-align: center; overflow: hidden; padding-top: clamp(120px, 16vh, 170px); padding-bottom: clamp(90px, 13vh, 150px); }
-    .socials__head { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 3.5rem; }
+    .socials { background: var(--light); color: var(--bg-dark); text-align: center; overflow: hidden; padding-top: clamp(92px, 11vh, 118px); padding-bottom: clamp(48px, 7vh, 84px); }
+    .socials__head { display: flex; flex-direction: column; align-items: center; gap: .85rem; margin-bottom: 2rem; }
     .socials__icon { width: 48px; height: auto; color: var(--surface-2); }
     .socials__title { font-size: clamp(2.6rem, 7vw, 5.5rem); }
     .socials__word { color: var(--accent-off); }
     /* Arc of tall rounded phone-cards; CSS holds the settled FANNED state (no-JS safe),
        JS pops them out from a collapsed centre on scroll. */
-    .fan { position: relative; height: clamp(440px, 66vh, 580px); display: flex; align-items: flex-start; justify-content: center; }
+    /* v3-4 — the whole fan is driven by ONE inherited var: --fan 0 = stacked centre, 1 = open arc.
+       Default 1 (no-JS / reduced-motion = settled fan); JS sets it to 0 and scrubs it to 1. */
+    .fan { position: relative; height: clamp(440px, 66vh, 580px); display: flex; align-items: flex-start; justify-content: center; --fan: 1; }
     .phone {
       position: absolute; top: 0;
       width: clamp(150px, 17vw, 216px);
       aspect-ratio: 9 / 16;
-      border-radius: 22px; overflow: hidden;
+      border-radius: 0; overflow: hidden; /* v3-7 — sharp, consistent with the editorial system */
       background: var(--surface-1);
       border: 4px solid #0f1207;
       box-shadow: 0 34px 70px -34px rgba(35,38,28,.55);
       transform-origin: bottom center;
-      transition: transform var(--dur) var(--ease);
       will-change: transform;
     }
-    .fan .phone:nth-child(1) { transform: translateX(-226px) translateY(54px) rotate(-16deg); z-index: 6; }
-    .fan .phone:nth-child(2) { transform: translateX(-116px) translateY(16px) rotate(-8deg);  z-index: 8; }
-    .fan .phone:nth-child(3) { transform: translateX(0) translateY(-8px) rotate(0) scale(1.06); z-index: 10; }
-    .fan .phone:nth-child(4) { transform: translateX(116px) translateY(16px) rotate(8deg);   z-index: 8; }
-    .fan .phone:nth-child(5) { transform: translateX(226px) translateY(54px) rotate(16deg);  z-index: 6; }
+    .fan .phone:nth-child(1) { transform: translateX(calc(-226px * var(--fan))) translateY(calc(54px * var(--fan))) rotate(calc(-16deg * var(--fan))) scale(calc(.9 + .1 * var(--fan))); z-index: 6; }
+    .fan .phone:nth-child(2) { transform: translateX(calc(-116px * var(--fan))) translateY(calc(16px * var(--fan))) rotate(calc(-8deg * var(--fan)))  scale(calc(.9 + .1 * var(--fan))); z-index: 8; }
+    .fan .phone:nth-child(3) { transform: translateX(0) translateY(calc(-8px * var(--fan))) rotate(0) scale(calc(.9 + .16 * var(--fan))); z-index: 10; }
+    .fan .phone:nth-child(4) { transform: translateX(calc(116px * var(--fan))) translateY(calc(16px * var(--fan))) rotate(calc(8deg * var(--fan)))   scale(calc(.9 + .1 * var(--fan))); z-index: 8; }
+    .fan .phone:nth-child(5) { transform: translateX(calc(226px * var(--fan))) translateY(calc(54px * var(--fan))) rotate(calc(16deg * var(--fan)))  scale(calc(.9 + .1 * var(--fan))); z-index: 6; }
     .phone:hover { filter: brightness(1.06); }
     .phone__media { position: absolute; inset: 0; }
     .phone__media::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 0%, transparent 45%, rgba(0,0,0,.5)); }
@@ -635,14 +672,14 @@
     .phone__play { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; color: var(--bg-dark); }
     .phone__play svg { background: var(--accent); border-radius: 50%; padding: 12px; width: 50px; height: 50px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 
-    .footer { background: var(--bg-dark); padding-block: var(--pad-y) 2rem; }
-    .footer__statement { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .footer { background: var(--bg-dark); padding-block: var(--pad-y) .85rem; overflow: hidden; /* clip the topo ::before so it adds no dead space below the page */ }
+    .footer__statement { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
     .footer__statement h2 { font-size: clamp(3.4rem, 9vw, 7rem); }
     .footer__word { color: var(--accent); }
     .footer__statement .kv-mono { width: clamp(60px, 8vw, 100px); height: auto; color: var(--accent); }
     .footer__spin { transition: transform 1.2s var(--ease); }
     .footer__statement:hover .footer__spin { transform: rotate(-8deg); }
-    .footer__partners { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; align-items: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .footer__partners { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; align-items: center; margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.08); }
     .footer__partners .wordmark { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: 1.15rem; letter-spacing: .04em; color: rgba(242,242,234,.32); transition: color var(--dur) var(--ease); }
     .footer__partners .wordmark:hover { color: var(--light-2); }
     .footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; border-top: 1px solid rgba(255,255,255,.08); padding-top: 2rem; }
@@ -650,7 +687,11 @@
     .footer__col a, .footer__col li { display: block; font-size: 1.875rem; font-family:"Archivo",sans-serif; font-weight: 800; line-height: 1.35; color: var(--ink); transition: color var(--dur) var(--ease); }
     .footer__col.small a, .footer__col.small li { font-size: 1rem; font-weight: 500; color: var(--light-2); }
     .footer__col a:hover { color: var(--accent); }
-    .footer__legal { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 3rem; flex-wrap: wrap; color: var(--light-2); font-size: .85rem; }
+    /* v3-6 — subtle Oddomode signature */
+    .footer__odd { margin-top: 2rem; }
+    .footer__odd p { font-family: "Archivo", sans-serif; font-weight: 800; font-size: .72rem; text-transform: uppercase; letter-spacing: .22em; line-height: 1.7; color: var(--surface-2); }
+    .footer__odd p:first-child { color: var(--light-2); }
+    .footer__legal { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; color: var(--light-2); font-size: .85rem; }
     .footer__legal .tag { color: var(--accent-off); font-family:"Archivo",sans-serif; font-weight: 800; letter-spacing:.06em; }
 
     /* ===================================================================
@@ -672,14 +713,6 @@
       .footer__col a, .footer__col li { font-size: 1.4rem; }
     }
     @media (max-width: 720px) {
-      .nav__links { display: none; }
-      .nav__toggle { display: inline-flex; align-items: center; justify-content: center; }
-      .nav__links.is-open {
-        display: flex; flex-direction: column; align-items: flex-start; gap: .25rem;
-        position: absolute; top: 100%; right: 0; left: 0;
-        background: rgba(35,38,28,.98); backdrop-filter: blur(16px);
-        padding: 1rem var(--pad-x); border-bottom: 1px solid rgba(200,255,30,.22);
-      }
       .hero__foot { flex-direction: column; align-items: flex-start; }
       .hero__sig { align-self: flex-end; }
       /* Decorative portraits would collide with the centered words on phones */
@@ -726,20 +759,27 @@
     <a class="nav__brand" href="#home" aria-label="Kai Voss Startseite">
       <span class="nav__logo">Kai<br>Voss</span>
     </a>
-    <div class="nav__links" id="navLinks">
-      <a href="#home">Home</a>
-      <a href="#karriere">Karriere</a>
-      <a href="#helme">Helme</a>
-      <a href="#kalender">Kalender</a>
-    </div>
     <div class="nav__actions">
-      <a class="pill" href="#store">
+      <a class="pill" id="storePill" href="#store">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Zm3 0V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Store
       </a>
-      <button class="nav__toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="nav__toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="menuPanel">
+        <span class="nav__toggle-label">Menü</span>
+        <span class="nav__toggle-lines" aria-hidden="true"><span class="l l1"></span><span class="l l2"></span><span class="l l3"></span></span>
       </button>
+    </div>
+    <!-- dropdown panel — opens on toggle click, closes ONLY via × -->
+    <div class="menu-panel" id="menuPanel" role="dialog" aria-label="Navigation">
+      <button class="menu-panel__close" id="menuClose" aria-label="Menü schließen">&times;</button>
+      <nav class="menu-panel__links" aria-label="Hauptnavigation">
+        <a href="#home">Home</a>
+        <a href="#karriere">Karriere</a>
+        <a href="#helme">Helme</a>
+        <a href="#kalender">Kalender</a>
+        <a href="#store">Store</a>
+      </nav>
+      <p class="menu-panel__meta eyebrow">Kai Voss · Formel 1 · Saison 2026</p>
     </div>
   </nav>
 
@@ -1038,6 +1078,11 @@
         <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA</span><span class="wordmark">NORDBANK</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA</span><span class="wordmark">STRØM</span>
       </div>
 
+      <div class="footer__odd">
+        <p>Made by Oddomode</p>
+        <p>Official Demo Website</p>
+      </div>
+
       <div class="footer__legal">
         <span>© 2026 Kai Voss · Demo von Oddomode. Fiktive Person.</span>
         <span class="tag">Odd by design.</span>
@@ -1135,20 +1180,54 @@
         setTimeout(slideOut, CAP_MS);
       })();
 
-      /* ---- Mobile nav toggle ---- */
+      /* ---- v3-1 — signature dropdown nav (open on toggle, close ONLY via ×) ---- */
+      document.documentElement.classList.add("js"); // JS present → panel starts closed (no-JS = open/reachable)
       var toggle = document.getElementById("navToggle");
-      var links = document.getElementById("navLinks");
-      if (toggle && links) {
-        toggle.addEventListener("click", function () {
-          var open = links.classList.toggle("is-open");
-          toggle.setAttribute("aria-expanded", open ? "true" : "false");
-        });
-        links.addEventListener("click", function (e) {
-          if (e.target.tagName === "A") {
-            links.classList.remove("is-open");
-            toggle.setAttribute("aria-expanded", "false");
-          }
-        });
+      var storePill = document.getElementById("storePill");
+      var panel = document.getElementById("menuPanel");
+      var menuClose = document.getElementById("menuClose");
+      if (toggle && panel) {
+        var COLLAPSED = 44, WIDE = 132, delta = WIDE - COLLAPSED;
+        var menuOpen = false, openTL = null, closeTL = null;
+        var reduceMenu = reduce || !hasGSAP;
+        if (hasGSAP) window.gsap.set(panel, { "--reveal": 0 });
+
+        var doOpen = function () {
+          if (menuOpen) return; menuOpen = true;
+          toggle.setAttribute("aria-expanded", "true");
+          toggle.setAttribute("aria-label", "Menü schließen");
+          panel.classList.add("is-open");
+          if (reduceMenu) { toggle.classList.add("is-wide"); panel.style.setProperty("--reveal", "1"); return; }
+          if (closeTL) closeTL.kill();
+          toggle.classList.add("is-wide");
+          openTL = window.gsap.timeline({ defaults: { ease: "power3.out" } });
+          // (a) button widens LEFT + store shifts left the same amount (constant edge-to-edge gap)
+          openTL.to(toggle, { width: WIDE, duration: 0.34 }, 0)
+                .to(storePill, { x: -delta, duration: 0.34 }, 0)
+          // (b) panel unfolds down in TWO stages: partial height, then full
+                .fromTo(panel, { "--reveal": 0 }, { "--reveal": 0.5, duration: 0.26, ease: "power2.out" }, 0.3)
+                .to(panel, { "--reveal": 1, duration: 0.3, ease: "power2.out" }, ">-0.02");
+        };
+        var doClose = function () {
+          if (!menuOpen) return; menuOpen = false;
+          toggle.setAttribute("aria-expanded", "false");
+          toggle.setAttribute("aria-label", "Menü öffnen");
+          if (reduceMenu) { toggle.classList.remove("is-wide"); panel.style.setProperty("--reveal", "0"); panel.classList.remove("is-open"); return; }
+          if (openTL) openTL.kill();
+          // close = paper fold reversed: 2nd fold to middle, then 1st fold, then button narrows + store back
+          closeTL = window.gsap.timeline({ defaults: { ease: "power2.inOut" }, onComplete: function () { panel.classList.remove("is-open"); } });
+          closeTL.to(panel, { "--reveal": 0.5, duration: 0.22 }, 0)
+                 .to(panel, { "--reveal": 0, duration: 0.22 }, ">")
+                 .add(function () { toggle.classList.remove("is-wide"); }, ">")
+                 .to(toggle, { width: COLLAPSED, duration: 0.3 }, "<")
+                 .to(storePill, { x: 0, duration: 0.3 }, "<");
+        };
+        toggle.addEventListener("click", function () { if (!menuOpen) doOpen(); }); // opens only
+        if (menuClose) menuClose.addEventListener("click", doClose);              // closes only via ×
+        // link click navigates + closes (not an outside-click)
+        panel.addEventListener("click", function (e) { if (e.target.closest("a")) doClose(); });
+        // Esc as an accessibility affordance to close
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menuOpen) doClose(); });
       }
 
       /* ---- TASK 9 — Lenis wired to GSAP ticker ---- */
@@ -1313,12 +1392,14 @@
           splitDrawPath.style.strokeDasharray = splitDrawLen;
           splitDrawPath.style.strokeDashoffset = splitDrawLen;
         }
-        /* F1 — slower + absolutely smooth: longer scroll range, higher scrub, and the
-           portraits/words EASE as they arrive at centre (power2.out) instead of linear. */
+        /* v3-3 — ~75% slower: PIN the split and scrub the convergence over ~2.8 viewports so the
+           images glide gently to centre instead of blopping in. Single ease (expo.out). */
         var stl = window.gsap.timeline({
           scrollTrigger: {
-            trigger: ".split", start: "top bottom", end: "top 5%",
-            scrub: 1.8, invalidateOnRefresh: true
+            trigger: ".split", start: "top top",
+            end: function () { return "+=" + Math.round(window.innerHeight * 2.8); },
+            pin: true, pinSpacing: true, anticipatePin: 1,
+            scrub: 1.5, invalidateOnRefresh: true
           }
         });
         stl.fromTo("#splitLeft",  { x: function () { return -vw() * 0.82; } }, { x: 0, ease: "expo.out" }, 0)
@@ -1330,16 +1411,17 @@
            .fromTo("#splitCtas",   { y: 34, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "expo.out" }, 0.62);
       }
 
-      /* ---- H3 — socials fan-out pop (collapsed centre → fanned arc) ---- */
-      var phones = window.gsap.utils.toArray(".fan .phone");
-      if (phones.length) {
-        window.gsap.from(phones, {
-          x: 0, y: 80, rotation: 0, scale: 0.8, autoAlpha: 0,
-          transformOrigin: "bottom center",
-          duration: 1.4, ease: "expo.out",
-          stagger: { each: 0.14, from: "center" },
-          immediateRender: false, /* keep fanned CSS as the pre-trigger fallback */
-          scrollTrigger: { trigger: ".fan", start: "top 82%", once: true }
+      /* ---- v3-4 — socials fan SCRUB: deterministically start STACKED dead-centre (only the top
+         card visible) → scroll-scrub opens each card to its fanned transform. No pop. The CSS
+         nth-child fan stays as the no-JS / reduced-motion fallback (this block is skipped there). ---- */
+      var fanEl = document.getElementById("fan");
+      if (fanEl) {
+        // start stacked (only the top card visible); scrub opens the arc. One var drives every card.
+        // fromTo + immediateRender pins the 0 start; NO invalidateOnRefresh (it would revert the
+        // inline var to the CSS default of 1 and leave the fan open).
+        window.gsap.fromTo(fanEl, { "--fan": 0 }, {
+          "--fan": 1, ease: "power2.out", immediateRender: true,
+          scrollTrigger: { trigger: ".socials", start: "top 80%", end: "top 25%", scrub: 1 }
         });
       }
 
