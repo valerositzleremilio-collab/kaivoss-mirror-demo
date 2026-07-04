@@ -493,7 +493,7 @@
       text-align: center;
       padding-block: var(--pad-y);
     }
-    .split__eyebrow { color: var(--surface-2); margin-bottom: 2.25rem; }
+    .split__eyebrow { color: var(--surface-2); margin-bottom: 1rem; } /* split-2: tighter */
 
     /* Converging CSS-art portraits (tall, mirror of Norris's ±edge → center entry) */
     .split__portrait {
@@ -520,24 +520,24 @@
       display: block;
       font-family: "Playfair Display", Georgia, serif; font-weight: 700; font-style: italic;
       color: var(--accent-off);
-      font-size: clamp(1.7rem, 4vw, 3rem);
+      font-size: clamp(1.3rem, 3vw, 2.25rem); /* split-1: ~25% smaller */
       letter-spacing: 0;
       transform: rotate(-4deg);
-      margin-bottom: -.28em;
+      margin-bottom: -.26em;
       will-change: transform, opacity;
     }
     .split__pair { line-height: .82; position: relative; }
     /* handwritten draw stroke sits over the AUF line */
     .split__draw {
       position: absolute; left: 50%; top: -2%;
-      width: clamp(180px, 26vw, 340px); height: auto;
+      width: clamp(140px, 20vw, 258px); height: auto; /* split-1: shrunk with the headline so the scribble still sits over AUF */
       transform: translateX(-50%) rotate(-3deg);
       pointer-events: none; overflow: visible;
     }
     .split__pair .big {
       display: block;
       font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900;
-      font-size: var(--t-impact);
+      font-size: clamp(3.4rem, 8.25vw, 6rem); /* split-1: ~25% smaller than --t-impact, adds air to the side tiles */
       color: var(--bg-dark);
       letter-spacing: -.01em;
       will-change: transform, opacity;
@@ -545,7 +545,7 @@
     .split__pair .big.is-out { -webkit-text-stroke: 2px var(--bg-dark); color: transparent; }
 
     /* sub-CTAs */
-    .split__ctas { position: relative; z-index: 2; display: flex; gap: 2.5rem 3.5rem; margin-top: 3rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
+    .split__ctas { position: relative; z-index: 2; display: flex; gap: 1.5rem 3.5rem; margin-top: 1.75rem; flex-wrap: wrap; justify-content: center; max-width: 760px; } /* split-2: tighter */
     .split__cta { max-width: 320px; }
     .split__cta p { font-size: 1rem; line-height: 1.4; color: var(--surface-2); }
     .split__link { display: inline-flex; align-items: center; gap: .75rem; margin-top: 1.25rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; color: var(--bg-dark); }
