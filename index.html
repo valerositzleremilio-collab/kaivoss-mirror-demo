@@ -481,7 +481,7 @@
     /* ===================================================================
        TASK 5 — SPLIT SECTIONS (light rhythm break)
        =================================================================== */
-    .split { background: var(--light); color: var(--bg-dark); overflow: hidden; }
+    .split { background: var(--light); color: var(--bg-dark); overflow: hidden; padding-block: 0; } /* v4-1: no section padding → the 100dvh stage centres content in the viewport (equal top/bottom) */
     /* Centered stage: two portraits flank the middle, the ON/OFF-style word-pair
        overlays center with an accent script word on top, sub-CTAs below.
        Everything animates IN from the edges on scroll (see JS). Default CSS = the
@@ -520,7 +520,7 @@
       display: block;
       font-family: "Playfair Display", Georgia, serif; font-weight: 700; font-style: italic;
       color: var(--accent-off);
-      font-size: clamp(1.3rem, 3vw, 2.25rem); /* split-1: ~25% smaller */
+      font-size: clamp(1rem, 2.25vw, 1.7rem); /* v4-1: ~25% smaller, proportional to headline */
       letter-spacing: 0;
       transform: rotate(-4deg);
       margin-bottom: -.26em;
@@ -530,14 +530,14 @@
     /* handwritten draw stroke sits over the AUF line */
     .split__draw {
       position: absolute; left: 50%; top: -2%;
-      width: clamp(140px, 20vw, 258px); height: auto; /* split-1: shrunk with the headline so the scribble still sits over AUF */
+      width: clamp(105px, 15vw, 193px); height: auto; /* v4-1: shrunk with the headline so the scribble still sits over AUF */
       transform: translateX(-50%) rotate(-3deg);
       pointer-events: none; overflow: visible;
     }
     .split__pair .big {
       display: block;
       font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900;
-      font-size: clamp(3.4rem, 8.25vw, 6rem); /* split-1: ~25% smaller than --t-impact, adds air to the side tiles */
+      font-size: clamp(2.55rem, 6.2vw, 4.5rem); /* v4-1: another ~25% down, more air to the side tiles */
       color: var(--bg-dark);
       letter-spacing: -.01em;
       will-change: transform, opacity;
