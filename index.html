@@ -404,9 +404,9 @@
     .statement__text {
       font-family: "Archivo Expanded", "Archivo", sans-serif;
       font-weight: 800;
-      font-size: clamp(2.1rem, 6.2vw, 5.4rem);
-      line-height: 1.06;
-      max-width: 15ch;
+      font-size: clamp(2.1rem, 6.2vw, 5.4rem); /* font-size UNCHANGED (reveal animation untouched) */
+      line-height: 1.04;     /* stmt-2: tighter leading → block fits/centres (safe for ä/ö umlaut accents) */
+      max-width: 17ch;       /* stmt-2: slightly wider → fewer line-wraps → shorter block */
       letter-spacing: -0.02em;
     }
     .statement__text .word { display: inline-block; }
@@ -817,7 +817,7 @@
   <!-- ================= TASK 3 — STATEMENT ================= -->
   <section class="section statement curve-top topo-dark" data-topo>
     <div class="container">
-      <p class="eyebrow" style="margin-bottom:1.5rem">eine nachricht von kai</p>
+      <p class="eyebrow" style="margin-bottom:.75rem">eine nachricht von kai</p>
       <p class="statement__text" id="statementText">
         <span class="word">Ich</span> <span class="word">fahre,</span> <span class="word">um</span>
         <span class="word"><em class="hl-serif">Grenzen</em></span> <span class="word">zu</span> <span class="word">verschieben,</span>
