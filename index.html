@@ -9,7 +9,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;800;900&family=Archivo+Expanded:wght@800;900&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=Archivo+Expanded:wght@800;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,600..900;1,6..96,500..800&display=swap" rel="stylesheet" />
 
   <style>
     /* ===================================================================
@@ -52,6 +52,11 @@
 
       /* Film grain (SVG fractalNoise data-URI) */
       --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+      /* I1 — topographic contour tile (flowing height-lines, edge-matched so it tiles seamlessly).
+         Used as a MASK so a single pattern adapts colour per section (dark lines on light bg,
+         light lines on dark bg) — the "background that runs through the whole page". */
+      --contour: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.4'%3E%3Cpath d='M0 70 C120 20 220 120 320 70 S520 20 600 70'/%3E%3Cpath d='M0 150 C110 100 230 210 340 150 S540 110 600 150'/%3E%3Cpath d='M0 235 C140 300 240 170 350 245 S520 300 600 235'/%3E%3Cpath d='M0 320 C120 260 250 380 360 315 S520 260 600 320'/%3E%3Cpath d='M0 405 C130 470 240 350 350 415 S530 470 600 405'/%3E%3Cpath d='M0 485 C120 430 250 545 360 485 S520 435 600 485'/%3E%3Cpath d='M0 560 C120 520 230 600 340 555 S540 515 600 560'/%3E%3C/g%3E%3C/svg%3E");
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -61,7 +66,7 @@
     body {
       background: var(--bg-dark);
       color: var(--ink);
-      font-family: "Inter", system-ui, sans-serif;
+      font-family: "Archivo", system-ui, sans-serif;
       font-size: var(--t-body);
       line-height: 1.5;
       overflow-x: clip; /* clip on body; never the hidden variant on html */
@@ -77,6 +82,11 @@
       line-height: .92;
       letter-spacing: -0.01em;
     }
+    /* Second display family (D1): high-contrast fashion serif for brand/emotional words,
+       mixed INSIDE grotesk headlines (D2). Accent-coloured when it carries the emphasis. */
+    .serif { font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; letter-spacing: 0; }
+    .serif-i { font-style: italic; }
+    .hl-serif { font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; font-style: italic; color: var(--accent); letter-spacing: 0; }
 
     .eyebrow {
       font-family: "Archivo", sans-serif;
@@ -98,6 +108,42 @@
     }
 
     .section { padding-block: var(--pad-y); position: relative; }
+
+    /* ===================================================================
+       I1 — GLOBAL TOPO-CONTOUR LAYER (runs through every section)
+       One masked pattern; --topo-color adapts to each section's bg so it
+       reads on light AND dark. Parallax added per-section in JS.
+       =================================================================== */
+    [data-topo] { position: relative; }
+    [data-topo]::before {
+      content: ""; position: absolute; inset: -20% 0; z-index: 0; pointer-events: none;
+      background: var(--topo-color, rgba(35,38,28,.55));
+      -webkit-mask-image: var(--contour); mask-image: var(--contour);
+      -webkit-mask-size: 620px auto; mask-size: 620px auto;
+      -webkit-mask-repeat: repeat; mask-repeat: repeat;
+      opacity: var(--topo-op, .5);
+      transform: translate3d(0, var(--topo-shift, 0px), 0);
+      will-change: transform;
+    }
+    /* keep real content above the contour layer */
+    [data-topo] > * { position: relative; z-index: 1; }
+    /* dark sections → faint light/lime lines; light sections → faint ink lines */
+    .topo-dark  { --topo-color: rgba(200,255,30,.5);  --topo-op: .07; }
+    .topo-light { --topo-color: rgba(35,38,28,.55);   --topo-op: .10; }
+
+    /* ===================================================================
+       I2 — CURVED SECTION DIVIDERS (a section resolves into a curve)
+       =================================================================== */
+    .curve-top {
+      border-top-left-radius: 50% 72px;
+      border-top-right-radius: 50% 72px;
+      margin-top: -46px;
+    }
+    .curve-bottom {
+      border-bottom-left-radius: 50% 72px;
+      border-bottom-right-radius: 50% 72px;
+      margin-bottom: -46px; position: relative; z-index: 2;
+    }
 
     /* Signature underline stroke reused across sections */
     .underline-stroke { display: inline-block; width: clamp(120px, 22vw, 260px); height: auto; color: var(--accent); }
@@ -153,16 +199,20 @@
       background: transparent; /* reference: fully transparent, overlaps hero from y=0 — no bar, no blur */
     }
     /* legibility over hero/dark sections without a background bar */
-    .nav__brand span, .nav__links a { text-shadow: 0 1px 14px rgba(0,0,0,.4); }
-    .nav__brand .kv-mono, .nav__toggle { filter: drop-shadow(0 1px 10px rgba(0,0,0,.4)); }
-    /* text-color adaptation over LIGHT/ACCENT sections (no background added — matches reference's text flip) */
-    .nav.is-light .nav__links a:not(.pill), .nav.is-light .nav__brand span { color: var(--bg-dark); text-shadow: none; }
-    .nav.is-light .nav__brand .kv-mono, .nav.is-light .nav__toggle { color: var(--bg-dark); filter: none; }
-    .nav.is-light .nav__links a:not(.pill):hover { color: #000; }
-    .nav.is-light .pill { background: var(--bg-dark); color: var(--accent) !important; }
-    .nav__brand { display: flex; align-items: center; gap: .6rem; }
-    .nav__brand .kv-mono { width: 34px; height: 34px; }
-    .nav__brand span { font-family: "Archivo", sans-serif; font-weight: 800; letter-spacing: .12em; font-size: .8rem; text-transform: uppercase; }
+    .nav__logo, .nav__links a { text-shadow: 0 1px 14px rgba(0,0,0,.4); }
+    .nav__toggle { filter: drop-shadow(0 1px 10px rgba(0,0,0,.4)); }
+    /* B4 — text-color adaptation over LIGHT/ACCENT sections (store-pill stays constant lime) */
+    .nav.is-light .nav__links a { color: var(--bg-dark); text-shadow: none; }
+    .nav.is-light .nav__logo { color: var(--bg-dark); text-shadow: none; }
+    .nav.is-light .nav__toggle { color: var(--bg-dark); border-color: rgba(35,38,28,.4); filter: none; }
+    .nav.is-light .nav__links a:hover { color: #000; }
+    /* B2 — stacked serif wordmark (2 lines) */
+    .nav__brand { display: flex; align-items: center; }
+    .nav__logo {
+      font-family: "Bodoni Moda", Georgia, serif; font-weight: 700;
+      font-size: 1.2rem; line-height: .88; letter-spacing: .01em; color: var(--ink);
+    }
+    .nav__actions { display: flex; align-items: center; gap: .85rem; }
     .nav__links { display: flex; align-items: center; gap: 1.75rem; }
     .nav__links a {
       font-family: "Archivo", sans-serif;
@@ -177,43 +227,83 @@
       align-items: center;
     }
     .nav__links a:not(.pill):hover { color: var(--ink); }
+    /* B3 — store pill (bag icon), constant lime across all sections */
     .pill {
+      display: inline-flex; align-items: center; gap: .5rem;
       background: var(--accent);
       color: var(--bg-dark) !important;
-      padding: .55rem 1.2rem;
+      padding: .58rem 1.15rem;
       border-radius: var(--r-lg);
-      font-weight: 800 !important;
+      font-family: "Archivo", sans-serif; font-weight: 800 !important;
+      font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+      min-height: 44px;
       transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
     }
+    .pill svg { color: var(--bg-dark); }
     .pill:hover { background: #d6ff4d; }
     .pill:active { transform: scale(0.97); }
 
-    .nav__toggle { display: none; background: none; border: 0; color: var(--ink); cursor: pointer; min-width: 44px; min-height: 44px; }
+    /* B3 — outlined square menu button, visible on every breakpoint */
+    .nav__toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; background: none; cursor: pointer;
+      color: var(--ink); border: 1.5px solid rgba(242,242,234,.5); border-radius: 12px;
+      transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .nav__toggle:hover { background: rgba(242,242,234,.1); }
+    .nav.is-light .nav__toggle:hover { background: rgba(35,38,28,.08); }
 
     /* ===================================================================
        TASK 2 — HERO
        =================================================================== */
     .hero {
-      min-height: 100dvh;
+      height: 100dvh;
       position: relative;
       overflow: hidden;
-      background: var(--bg-dark);
+      /* Starts LIGHT (mirror of Norris: body bg flips light→dark on scrub). JS scrubs
+         this to --bg-dark; no-JS keeps the light hero fully legible. */
+      background: var(--light);
     }
-    /* Media panel = our CSS-art grade. Full-bleed by default; JS scrubs it down into a framed
-       card (mirror of the reference portrait shrinking full-bleed → contained). */
+    /* Media panel = our CSS-art PORTRAIT (own asset, desaturated olive→graphite so it reads as a
+       monochrome driver portrait). Full-bleed by default; JS scrubs it into a centered card
+       (mirror of the reference portrait shrinking full-bleed → contained, ~scale .58). */
     .hero__media {
       position: absolute; inset: 0; z-index: 1; transform-origin: center center;
+      overflow: hidden; will-change: transform;
+      /* LIGHT parchment portrait at rest (full-bleed = light screen, mirror of Norris top) */
       background:
-        radial-gradient(120% 90% at 15% 10%, rgba(200,255,30,.12), transparent 55%),
-        radial-gradient(90% 70% at 90% 100%, rgba(78,79,73,.55), transparent 60%),
-        linear-gradient(180deg, #2b2f22, var(--bg-dark) 70%);
+        radial-gradient(52% 46% at 50% 40%, rgba(150,160,120,.5), transparent 62%),
+        radial-gradient(120% 70% at 50% 4%, rgba(206,214,186,.9), transparent 55%),
+        linear-gradient(180deg, #e2e6d5 0%, #cfd4bf 52%, #b9bfa4 100%);
     }
-    .hero__media::after { content:""; position:absolute; inset:0; background-image:var(--grain); opacity:.06; mix-blend-mode:overlay; pointer-events:none; }
-    /* Marquee band revealed behind the media as it shrinks (mirror of reference reveal) */
-    .hero__band { position:absolute; inset:0; z-index:0; display:flex; align-items:center; overflow:hidden; }
-    .hero__band .marquee__track { animation-duration: 30s; }
-    .hero__band .bw { font-family:"Archivo Expanded","Archivo",sans-serif; font-weight:900; font-size:clamp(3rem,9vw,7rem); line-height:1; white-space:nowrap; padding-right:2.5rem; letter-spacing:-.01em; color:var(--surface-2); }
-    .hero__band .bw--accent { color:var(--accent-off); }
+    /* abstract standing-figure silhouette so the full-bleed media reads as a portrait */
+    .hero__media::before {
+      content:""; position:absolute; left:50%; bottom:0; width:min(44vw,500px); height:80%;
+      transform:translateX(-50%);
+      background:
+        radial-gradient(48% 26% at 50% 14%, rgba(70,78,52,.7), transparent 62%),
+        radial-gradient(66% 58% at 50% 82%, rgba(58,66,44,.72), transparent 66%);
+      filter:blur(3px);
+    }
+    .hero__media::after { content:""; position:absolute; inset:0; background-image:var(--grain); opacity:.08; mix-blend-mode:overlay; pointer-events:none; }
+    /* moody green grade that fades IN over the portrait during the scrub (end card = dark, like Norris) */
+    .hero__grade {
+      position:absolute; inset:0; z-index:2; opacity:0; pointer-events:none;
+      background:
+        radial-gradient(60% 50% at 50% 34%, rgba(70,86,40,.42), transparent 66%),
+        linear-gradient(180deg, rgba(30,38,20,.5) 0%, rgba(18,22,13,.9) 100%);
+      mix-blend-mode:multiply;
+    }
+    /* Two-line running marquee band revealed BEHIND the media as it shrinks (mirror of Norris:
+       line 1 accent, line 2 cream, huge display type, scrubbed opacity reveal). */
+    .hero__band { position:absolute; inset:0; z-index:0; display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:.1em; overflow:hidden; }
+    .hero__band .marquee { width:100%; }
+    .hero__band .band-line-1 .marquee__track { animation-duration: 34s; }
+    .hero__band .band-line-2 .marquee__track { animation-duration: 40s; animation-direction: reverse; }
+    .hero__band .bw { font-family:"Archivo Expanded","Archivo",sans-serif; font-weight:900; font-size:clamp(3.4rem,12vw,9rem); line-height:.98; white-space:nowrap; padding-right:2.5rem; letter-spacing:-.02em; text-transform:uppercase; }
+    .hero__band .band-line-1 .bw { color:var(--accent); }
+    .hero__band .band-line-2 .bw { color:var(--ink); }
+    .hero__band .band-line-2 .bw.serif { font-family:"Bodoni Moda",Georgia,serif; font-weight:800; font-style:italic; text-transform:none; }
 
     /* Marquee eyebrow */
     .marquee {
@@ -228,11 +318,12 @@
     .hero__inner {
       position: relative; z-index: 3;
       max-width: 1440px; margin-inline: auto; width: 100%;
-      min-height: 100dvh;
+      height: 100dvh;
       display: flex; flex-direction: column; justify-content: flex-end;
       padding: 7rem var(--pad-x) var(--pad-y);
+      pointer-events: none;
     }
-    .hero__eyebrow-wrap { margin-bottom: 1.5rem; }
+    .hero__inner .next-race { pointer-events: auto; }
 
     /* Mask-reveal wrappers */
     .reveal-line { overflow: hidden; display: block; }
@@ -253,45 +344,50 @@
 
     .hero__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap; }
 
-    /* Next race widget */
+    /* Next race widget — mirror of Norris bottom-left tall card; legible on the LIGHT hero */
     .next-race {
-      border: 1px solid rgba(200,255,30,.35);
+      border: 1px solid rgba(35,38,28,.28);
       border-radius: var(--r-sm);
       padding: 1rem 1.25rem;
-      background: rgba(53,55,47,.4);
+      background: rgba(233,236,221,.55);
       backdrop-filter: blur(6px);
       min-width: 240px;
+      color: var(--bg-dark);
     }
-    .next-race .eyebrow { color: var(--accent); display: flex; align-items: center; gap: .5rem; }
-    .next-race .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(200,255,30,.5); animation: pulse 2s var(--ease) infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(200,255,30,.5);} 70%{ box-shadow: 0 0 0 8px rgba(200,255,30,0);} 100%{ box-shadow:0 0 0 0 rgba(200,255,30,0);} }
+    .next-race .eyebrow { color: var(--accent-off); display: flex; align-items: center; gap: .5rem; }
+    .next-race .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-off); box-shadow: 0 0 0 0 rgba(168,189,58,.5); animation: pulse 2s var(--ease) infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(168,189,58,.5);} 70%{ box-shadow: 0 0 0 8px rgba(168,189,58,0);} 100%{ box-shadow:0 0 0 0 rgba(168,189,58,0);} }
     .next-race__name { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1.5rem; margin-top: .4rem; }
-    .next-race__date { color: var(--light-2); font-size: .95rem; }
-
-    .hero__sig { color: var(--accent); width: clamp(90px, 12vw, 150px); height: auto; }
+    .next-race__date { color: var(--surface-2); font-size: .95rem; }
 
     /* ===================================================================
        TASK 3 — EDITORIAL STATEMENT
        =================================================================== */
     .statement { background: var(--bg-dark); }
+    /* D3 — statement fills the viewport (mirror of Norris cream word-reveal panel) */
+    .statement .container { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
     .statement__text {
       font-family: "Archivo Expanded", "Archivo", sans-serif;
       font-weight: 800;
-      font-size: var(--t-med);
-      line-height: 1.12;
-      max-width: 20ch;
-      letter-spacing: -0.01em;
+      font-size: clamp(2.1rem, 6.2vw, 5.4rem);
+      line-height: 1.06;
+      max-width: 15ch;
+      letter-spacing: -0.02em;
     }
     .statement__text .word { display: inline-block; }
     em.hl { font-style: normal; color: var(--accent); }
+    /* D2 — serif emphasis word mixed inside the grotesk headline */
+    .statement__text em.hl-serif { font-family: "Bodoni Moda", Georgia, serif; font-style: italic; font-weight: 700; color: var(--accent); letter-spacing: 0; }
     strong.hl { color: var(--ink); font-weight: 900; }
 
     /* ===================================================================
        TASK 4 — HORIZONTAL MOMENT GALLERY
        =================================================================== */
-    .gallery { background: var(--bg-dark); overflow: hidden; }
+    /* E3 — gallery on a LIGHT/parchment ground */
+    .gallery { background: var(--light); color: var(--bg-dark); overflow: hidden; }
     .gallery__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .gallery__head h2 { font-size: var(--t-h1); }
+    .gallery__head .eyebrow { color: var(--surface-2); }
     /* Default (no-JS / reduced-motion): gallery is a fully visible wrapped grid */
     .pin-wrap { height: auto; overflow: hidden; }
     .track { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; padding: 1rem var(--pad-x); will-change: transform; }
@@ -307,22 +403,26 @@
       height: var(--h, 60vh);
       margin-top: var(--y, 8vh);
       margin-left: var(--gx, clamp(1.25rem, 3vw, 3rem));
-      border-radius: var(--r-md-card, var(--r-md));
+      border-radius: 0; /* E1 — sharp-cornered cards */
     }
     .gallery-pinned .card:first-child { margin-left: 0; }
     .card {
       position: relative;
       flex: 0 0 clamp(280px, 34vw, 460px);
       height: min(70vh, 560px);
-      border-radius: var(--r-md);
+      border-radius: 0; /* E1 — sharp corners */
       overflow: hidden;
       background: var(--surface-1);
     }
-    .card__media { position: absolute; inset: 0; }
+    /* E3 — images run B/W by default; one hero card keeps full colour (.card--color) */
+    .card__media { position: absolute; inset: 0; filter: grayscale(1) contrast(1.05) brightness(.94); }
+    .card--color .card__media { filter: none; }
     .card__media::after { content: ""; position: absolute; inset: 0; background-image: var(--grain); opacity: .12; mix-blend-mode: overlay; }
     .card__vignette { position: absolute; inset: 0; background: radial-gradient(120% 100% at 50% 0%, transparent 40%, rgba(0,0,0,.45)); }
     .card__caption { position: absolute; top: 1.25rem; left: 1.25rem; z-index: 2; color: var(--ink); }
-    .card__caption .eyebrow { color: var(--accent); }
+    .card__caption .eyebrow { color: var(--ink); display: flex; flex-direction: column; gap: .5rem; }
+    /* E3 — tiny lime tab-marker above each caption */
+    .card__caption .eyebrow::before { content: ""; width: 26px; height: 4px; border-radius: 2px; background: var(--accent); }
 
     /* olive/lime mesh grades — one consistent family */
     .grade-1 { background: radial-gradient(80% 90% at 20% 10%, #4e5b1f, transparent 60%), radial-gradient(70% 80% at 90% 90%, #2e3520, transparent 55%), linear-gradient(140deg, #35372f, #1c1f16); }
@@ -383,15 +483,22 @@
     .split__words { position: relative; z-index: 2; }
     .split__script {
       display: block;
-      font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900; font-style: italic;
+      font-family: "Bodoni Moda", Georgia, serif; font-weight: 700; font-style: italic;
       color: var(--accent-off);
-      font-size: clamp(1.5rem, 3.4vw, 2.6rem);
-      letter-spacing: .01em;
+      font-size: clamp(1.7rem, 4vw, 3rem);
+      letter-spacing: 0;
       transform: rotate(-4deg);
-      margin-bottom: -.34em;
+      margin-bottom: -.28em;
       will-change: transform, opacity;
     }
-    .split__pair { line-height: .82; }
+    .split__pair { line-height: .82; position: relative; }
+    /* handwritten draw stroke sits over the AUF line */
+    .split__draw {
+      position: absolute; left: 50%; top: -2%;
+      width: clamp(180px, 26vw, 340px); height: auto;
+      transform: translateX(-50%) rotate(-3deg);
+      pointer-events: none; overflow: visible;
+    }
     .split__pair .big {
       display: block;
       font-family: "Archivo Expanded", "Archivo", sans-serif; font-weight: 900;
@@ -406,9 +513,18 @@
     .split__ctas { position: relative; z-index: 2; display: flex; gap: 2.5rem 3.5rem; margin-top: 3rem; flex-wrap: wrap; justify-content: center; max-width: 760px; }
     .split__cta { max-width: 320px; }
     .split__cta p { font-size: 1rem; line-height: 1.4; color: var(--surface-2); }
-    .split__link { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; color: var(--bg-dark); }
-    .split__link svg { transition: transform var(--dur) var(--ease); }
-    .split__link:hover svg { transform: translateX(6px); }
+    .split__link { display: inline-flex; align-items: center; gap: .75rem; margin-top: 1.25rem; font-family: "Archivo", sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .85rem; min-height: 44px; color: var(--bg-dark); }
+    /* F2 — lime rounded-square arrow button */
+    .split__btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--accent); color: var(--bg-dark);
+      box-shadow: 0 12px 26px -12px rgba(35,38,28,.5);
+      transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .split__link:hover .split__btn { transform: translateX(4px); background: #d6ff4d; }
+    .split__link .split__btn svg { transition: transform var(--dur) var(--ease); }
+    .split__link:hover .split__btn svg { transform: translateX(2px); }
 
     /* ===================================================================
        TASK 6 — HELM-GRID
@@ -416,7 +532,9 @@
     .helmets { background: var(--bg-dark); }
     .helmets__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
     .helmets__head h2 { font-size: var(--t-h1); }
-    .helmet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+    .helmet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); align-items: start; }
+    /* G1 — staggered columns: 1 & 3 high, 2 & 4 dropped lower */
+    .helmet-card:nth-child(4n+2), .helmet-card:nth-child(4n) { margin-top: clamp(32px, 7vh, 80px); }
     .helmet-card {
       position: relative;
       background: var(--surface-1);
@@ -438,8 +556,11 @@
        TASK 7 — STORE CTA (only accent-flooded section)
        =================================================================== */
     .store-cta { background: var(--accent); color: var(--bg-dark); text-align: center; }
-    .store-cta__inner { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .store-cta__inner { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+    .store-cta__eyebrow { color: rgba(35,38,28,.7); display: inline-flex; align-items: center; gap: .5rem; }
+    .store-cta__eyebrow svg { color: var(--bg-dark); }
     .store-cta h2 { font-size: var(--t-impact); }
+    .store-cta__word { color: var(--bg-dark); font-weight: 700; padding-inline: .04em; }
     .store-cta h2 .dot { color: var(--ember); }
     .store-cta p { font-size: var(--t-reg); max-width: 24ch; margin-inline: auto; }
     .btn-dark {
@@ -463,16 +584,67 @@
     /* ===================================================================
        TASK 8 — PARTNER MARQUEE + FOOTER
        =================================================================== */
-    .partners { background: var(--bg-dark); padding-block: 3rem; border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
-    .partners .marquee__track { animation-duration: 30s; }
-    .partners .marquee__track:hover, .partners .marquee:hover .marquee__track { animation-play-state: paused; }
-    .partners .wordmark { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: 1.6rem; letter-spacing: .04em; color: var(--surface-2); padding-right: 3rem; transition: color var(--dur) var(--ease); }
-    .partners .wordmark:hover { color: var(--light-2); }
+    /* ---- H2 — PARTNERS / COLLABS (light section) ---- */
+    .partners-full { background: var(--light); color: var(--bg-dark); padding-block: var(--pad-y); }
+    .partners-full__head { text-align: center; margin-bottom: 2.5rem; }
+    .partners-full__head .eyebrow { color: var(--surface-2); display: block; margin-bottom: 1rem; }
+    .partners-full__head h2 { font-size: var(--t-h1); }
+    .partners-full__word { color: var(--accent-off); }
+    .partners-marq { padding-block: 1rem 2.5rem; }
+    .partners-marq .marquee__track { animation: marquee 34s linear infinite; }
+    .partners-marq .marquee:hover .marquee__track, .partners-marq .marquee__track:hover { animation-play-state: paused; }
+    .partners-marq .wordmark { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: clamp(1.4rem,2.4vw,1.9rem); letter-spacing: .04em; color: rgba(35,38,28,.34); padding-right: 3rem; transition: color var(--dur) var(--ease); }
+    .partners-marq .wordmark:hover { color: var(--bg-dark); }
+    .partners-vector { display: flex; gap: 2rem; align-items: center; justify-content: space-between; border-top: 1px solid rgba(35,38,28,.12); padding-top: 2rem; flex-wrap: wrap; }
+    .partners-vector__art { width: min(52%, 520px); height: 120px; color: var(--accent-off); }
+    .partners-vector__copy { max-width: 360px; }
+    .partners-vector__copy p { font-size: 1.1rem; color: var(--surface-2); }
+
+    /* ---- H3 — SOCIALS FAN-OUT ---- */
+    .socials { background: var(--light); color: var(--bg-dark); text-align: center; overflow: hidden; }
+    .socials__head { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 3.5rem; }
+    .socials__icon { width: 48px; height: auto; color: var(--surface-2); }
+    .socials__title { font-size: clamp(2.6rem, 7vw, 5.5rem); }
+    .socials__word { color: var(--accent-off); }
+    /* Arc of tall rounded phone-cards; CSS holds the settled FANNED state (no-JS safe),
+       JS pops them out from a collapsed centre on scroll. */
+    .fan { position: relative; height: min(66vh, 580px); display: flex; align-items: flex-start; justify-content: center; }
+    .phone {
+      position: absolute; top: 0;
+      width: clamp(150px, 17vw, 216px);
+      aspect-ratio: 9 / 16;
+      border-radius: 22px; overflow: hidden;
+      background: var(--surface-1);
+      border: 4px solid #0f1207;
+      box-shadow: 0 34px 70px -34px rgba(35,38,28,.55);
+      transform-origin: bottom center;
+      transition: transform var(--dur) var(--ease);
+      will-change: transform;
+    }
+    .fan .phone:nth-child(1) { transform: translateX(-226px) translateY(54px) rotate(-16deg); z-index: 6; }
+    .fan .phone:nth-child(2) { transform: translateX(-116px) translateY(16px) rotate(-8deg);  z-index: 8; }
+    .fan .phone:nth-child(3) { transform: translateX(0) translateY(-8px) rotate(0) scale(1.06); z-index: 10; }
+    .fan .phone:nth-child(4) { transform: translateX(116px) translateY(16px) rotate(8deg);   z-index: 8; }
+    .fan .phone:nth-child(5) { transform: translateX(226px) translateY(54px) rotate(16deg);  z-index: 6; }
+    .phone:hover { filter: brightness(1.06); }
+    .phone__media { position: absolute; inset: 0; }
+    .phone__media::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 0%, transparent 45%, rgba(0,0,0,.5)); }
+    .phone__label { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: flex; flex-direction: column; gap: .1rem; padding: .9rem; text-align: left; color: var(--ink); }
+    .phone__label .eyebrow { color: var(--accent); }
+    .phone__tag { font-family: "Archivo", sans-serif; font-weight: 800; font-size: 1rem; }
+    .phone__play { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; color: var(--bg-dark); }
+    .phone__play svg { background: var(--accent); border-radius: 50%; padding: 12px; width: 50px; height: 50px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 
     .footer { background: var(--bg-dark); padding-block: var(--pad-y) 2rem; }
-    .footer__statement { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 3rem; }
-    .footer__statement h2 { font-size: var(--t-impact); }
-    .footer__statement .kv-mono { width: clamp(60px, 8vw, 100px); height: auto; }
+    .footer__statement { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .footer__statement h2 { font-size: clamp(3.4rem, 9vw, 7rem); }
+    .footer__word { color: var(--accent); }
+    .footer__statement .kv-mono { width: clamp(60px, 8vw, 100px); height: auto; color: var(--accent); }
+    .footer__spin { transition: transform 1.2s var(--ease); }
+    .footer__statement:hover .footer__spin { transform: rotate(-8deg); }
+    .footer__partners { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; align-items: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .footer__partners .wordmark { font-family: "Archivo Expanded","Archivo",sans-serif; font-weight: 900; font-size: 1.15rem; letter-spacing: .04em; color: rgba(242,242,234,.32); transition: color var(--dur) var(--ease); }
+    .footer__partners .wordmark:hover { color: var(--light-2); }
     .footer__grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; border-top: 1px solid rgba(255,255,255,.08); padding-top: 2rem; }
     .footer__col h3 { font-family:"Archivo",sans-serif; font-weight: 800; font-size: .75rem; text-transform: uppercase; letter-spacing:.14em; color: var(--light-2); margin-bottom: 1rem; }
     .footer__col a, .footer__col li { display: block; font-size: 1.875rem; font-family:"Archivo",sans-serif; font-weight: 800; line-height: 1.35; color: var(--ink); transition: color var(--dur) var(--ease); }
@@ -491,6 +663,8 @@
        =================================================================== */
     @media (max-width: 900px) {
       .helmet-grid { grid-template-columns: repeat(2, 1fr); }
+      .helmet-card:nth-child(4n+2), .helmet-card:nth-child(4n) { margin-top: 0; }
+      .helmet-card:nth-child(2n) { margin-top: clamp(28px, 5vh, 56px); }
       .split__portrait { width: clamp(110px, 13vw, 150px); }
       .split__portrait.is-left { left: 1rem; }
       .split__portrait.is-right { right: 1rem; }
@@ -550,88 +724,72 @@
   <!-- ================= NAV ================= -->
   <nav class="nav">
     <a class="nav__brand" href="#home" aria-label="Kai Voss Startseite">
-      <svg class="kv-mono" viewBox="0 0 100 100" fill="none" aria-hidden="true">
-        <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Kai Voss</span>
+      <span class="nav__logo">Kai<br>Voss</span>
     </a>
     <div class="nav__links" id="navLinks">
       <a href="#home">Home</a>
       <a href="#karriere">Karriere</a>
       <a href="#helme">Helme</a>
       <a href="#kalender">Kalender</a>
-      <a class="pill" href="#store">Store</a>
     </div>
-    <button class="nav__toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
+    <div class="nav__actions">
+      <a class="pill" href="#store">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Zm3 0V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Store
+      </a>
+      <button class="nav__toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
   </nav>
 
-  <!-- ================= HERO ================= -->
+  <!-- ================= HERO (Norris mirror: full-bleed portrait → centered card, light→dark) ================= -->
   <header class="hero" id="home">
+    <!-- two-line running marquee band, revealed behind the media as it shrinks -->
     <div class="hero__band" aria-hidden="true">
-      <div class="marquee">
+      <div class="marquee band-line-1">
         <div class="marquee__track">
-          <span class="bw">KAMPFMODUS</span><span class="bw bw--accent">SAISON 2026</span><span class="bw">KAMPFMODUS</span><span class="bw bw--accent">SAISON 2026</span>
-          <span class="bw">KAMPFMODUS</span><span class="bw bw--accent">SAISON 2026</span><span class="bw">KAMPFMODUS</span><span class="bw bw--accent">SAISON 2026</span>
+          <span class="bw">Kampfmodus</span><span class="bw">Saison 2026</span><span class="bw">Kampfmodus</span><span class="bw">Saison 2026</span>
+          <span class="bw">Kampfmodus</span><span class="bw">Saison 2026</span><span class="bw">Kampfmodus</span><span class="bw">Saison 2026</span>
+        </div>
+      </div>
+      <div class="marquee band-line-2">
+        <div class="marquee__track">
+          <span class="bw serif">Immer im Kampf</span><span class="bw">·&nbsp;KV&nbsp;·</span><span class="bw serif">Immer im Kampf</span><span class="bw">·&nbsp;KV&nbsp;·</span>
+          <span class="bw serif">Immer im Kampf</span><span class="bw">·&nbsp;KV&nbsp;·</span><span class="bw serif">Immer im Kampf</span><span class="bw">·&nbsp;KV&nbsp;·</span>
         </div>
       </div>
     </div>
-    <div class="hero__media"></div>
+
+    <!-- full-bleed CSS-art portrait media (our own asset) -->
+    <div class="hero__media" id="heroMedia"><div class="hero__grade"></div></div>
+
+    <!-- editorial-empty overlay: only the next-race widget, mirror of Norris bottom-left card -->
     <div class="hero__inner">
-      <div class="hero__eyebrow-wrap marquee">
-        <div class="marquee__track">
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-          <span class="eyebrow">formel one · seit 2019</span>
-        </div>
-      </div>
-
-      <h1 class="display">
-        <span class="reveal-line rl-1"><span>KAI</span></span>
-        <span class="reveal-line rl-2"><span>VOSS</span></span>
-      </h1>
-      <span class="reveal-line rl-3"><span class="hero__sub">Formel-1-Fahrer · Saison 2026</span></span>
-
-      <div class="hero__foot">
-        <div class="reveal-line rl-4" style="overflow:visible">
-          <div class="next-race" id="kalender">
-            <span class="eyebrow">Nächstes Rennen</span>
-            <div class="next-race__name">Silverstone GP</div>
-            <div class="next-race__date">05. Juli 2026 · 15:00 MESZ</div>
-          </div>
-        </div>
-        <div class="reveal-line rl-5" style="overflow:visible">
-          <svg class="hero__sig" viewBox="0 0 200 70" fill="none" aria-hidden="true">
-            <path d="M8 58 C 40 10, 55 62, 78 26 C 92 6, 100 60, 120 34 C 140 12, 150 58, 172 24 C 182 12, 190 30, 194 20" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
-          </svg>
-        </div>
+      <div class="next-race" id="kalender">
+        <span class="eyebrow">Nächstes Rennen</span>
+        <div class="next-race__name">Silverstone GP</div>
+        <div class="next-race__date">05. Juli 2026 · 15:00 MESZ</div>
       </div>
     </div>
   </header>
 
   <!-- ================= TASK 3 — STATEMENT ================= -->
-  <section class="section statement">
+  <section class="section statement curve-top topo-dark" data-topo>
     <div class="container">
       <p class="eyebrow" style="margin-bottom:1.5rem">eine nachricht von kai</p>
       <p class="statement__text" id="statementText">
         <span class="word">Ich</span> <span class="word">fahre,</span> <span class="word">um</span>
-        <span class="word"><em class="hl">Grenzen</em></span> <span class="word">zu</span> <span class="word">verschieben,</span>
+        <span class="word"><em class="hl-serif">Grenzen</em></span> <span class="word">zu</span> <span class="word">verschieben,</span>
         <span class="word">für</span> <span class="word"><strong class="hl">jeden</strong></span> <span class="word"><strong class="hl">Sieg</strong></span> <span class="word">zu</span> <span class="word">kämpfen</span>
-        <span class="word">und</span> <span class="word">ein</span> <span class="word"><em class="hl">Vermächtnis</em></span> <span class="word">aufzubauen</span> <span class="word">—</span>
+        <span class="word">und</span> <span class="word">ein</span> <span class="word"><em class="hl-serif">Vermächtnis</em></span> <span class="word">aufzubauen</span> <span class="word">—</span>
         <span class="word">auf</span> <span class="word">und</span> <span class="word">neben</span> <span class="word">der</span> <span class="word">Strecke.</span>
       </p>
     </div>
   </section>
 
   <!-- ================= TASK 4 — HORIZONTAL GALLERY ================= -->
-  <section class="section gallery" id="karriere">
+  <section class="section gallery topo-light" id="karriere" data-topo>
     <div class="container">
       <div class="gallery__head">
         <h2 class="display">Momente</h2>
@@ -647,8 +805,8 @@
           <div class="card__caption"><span class="eyebrow">Monaco · 2024</span></div>
         </article>
 
-        <!-- Big landscape hero moment + signature, top-anchored -->
-        <article class="card" style="--w:clamp(360px,40vw,600px); --h:66vh; --y:5vh; --gx:clamp(1.5rem,3vw,3rem)">
+        <!-- Big landscape hero moment + signature, top-anchored — the ONE colour card (E3) -->
+        <article class="card card--color" style="--w:clamp(360px,40vw,600px); --h:66vh; --y:5vh; --gx:clamp(1.5rem,3vw,3rem)">
           <div class="card__media grade-2"></div>
           <div class="card__vignette"></div>
           <div class="card__caption"><span class="eyebrow">Silverstone · 2025</span></div>
@@ -708,7 +866,7 @@
   </section>
 
   <!-- ================= TASK 3 — POST-GALLERY SPLIT ENTRY (Norris ON/OFF mirror) ================= -->
-  <section class="section split" id="split">
+  <section class="section split topo-light" id="split" data-topo>
     <div class="container split__stage">
       <span class="eyebrow split__eyebrow">auf &amp; neben der strecke</span>
 
@@ -736,10 +894,14 @@
 
       <!-- Centered word-pair: accent script on top, AUF (filled) / NEBEN (outline) -->
       <div class="split__words">
-        <span class="split__script" id="splitScript">der Strecke</span>
+        <span class="split__script serif serif-i" id="splitScript">der Strecke</span>
         <div class="split__pair display">
           <span class="big" id="wordAuf">AUF</span>
           <span class="big is-out" id="wordNeben">NEBEN</span>
+          <!-- F2 — handwritten accent stroke that draws itself over the words -->
+          <svg class="split__draw" viewBox="0 0 420 120" fill="none" aria-hidden="true" preserveAspectRatio="none">
+            <path id="splitDrawPath" d="M20 84 C120 58 250 58 360 70 C400 74 402 96 350 98 C260 100 90 96 60 92" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"/>
+          </svg>
         </div>
       </div>
 
@@ -747,14 +909,16 @@
       <div class="split__ctas" id="splitCtas">
         <div class="split__cta">
           <p>Jede Runde ist ein Duell mit der <strong class="hl" style="color:var(--accent-off)">Millisekunde.</strong> Präzision, Mut und ein kühler Kopf bei 320 km/h.</p>
-          <a class="split__link" href="#karriere">Karriere ansehen
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <a class="split__link" href="#karriere">
+            <span class="split__btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Karriere ansehen
           </a>
         </div>
         <div class="split__cta">
           <p>Abseits des Cockpits zählt <strong class="hl" style="color:var(--accent-off)">Haltung.</strong> Nachwuchsförderung, Design und ein Team, das an dieselbe Vision glaubt.</p>
-          <a class="split__link" href="#store">Zur Kollektion
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <a class="split__link" href="#store">
+            <span class="split__btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Zur Kollektion
           </a>
         </div>
       </div>
@@ -762,10 +926,10 @@
   </section>
 
   <!-- ================= TASK 6 — HELM-GRID ================= -->
-  <section class="section helmets" id="helme">
+  <section class="section helmets topo-dark" id="helme" data-topo>
     <div class="container">
       <div class="helmets__head">
-        <h2 class="display">Helm-Archiv</h2>
+        <h2 class="display">Helm-<span class="serif serif-i" style="color:var(--accent)">Archiv</span></h2>
         <p class="eyebrow">acht designs · 2019 – 2026</p>
       </div>
       <div class="helmet-grid" id="helmetGrid"></div>
@@ -773,29 +937,75 @@
   </section>
 
   <!-- ================= TASK 7 — STORE CTA ================= -->
-  <section class="section store-cta" id="store">
+  <section class="section store-cta topo-light" id="store" data-topo>
     <div class="container store-cta__inner">
-      <h2 class="display">KV Kollektion<span class="dot">.</span></h2>
+      <span class="store-cta__eyebrow eyebrow">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Zm3 0V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        KV Store · Saison 2026
+      </span>
+      <h2 class="display store-cta__title">Trag den <span class="serif serif-i store-cta__word">Kampfmodus.</span></h2>
       <p>Renn-DNA für den Alltag. Limitierte Stückzahl, kompromisslos gemacht.</p>
-      <a class="btn-dark" href="#store" aria-label="Zum Store (Demo)">Zum Store</a>
+      <a class="btn-dark" href="#store" aria-label="Zum Store (Demo)">Zum Store
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-left:.5rem"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
     </div>
   </section>
 
-  <!-- ================= TASK 8 — PARTNERS + FOOTER ================= -->
-  <section class="partners">
-    <div class="marquee">
+  <!-- ================= H2 — PARTNERS / COLLABS (full section: marquee + vector) ================= -->
+  <section class="partners-full topo-light" data-topo id="partner">
+    <div class="container">
+      <div class="partners-full__head">
+        <span class="eyebrow">Partner &amp; Kollaborationen</span>
+        <h2 class="display">Gemeinsam <span class="serif serif-i partners-full__word">schneller.</span></h2>
+      </div>
+    </div>
+    <div class="marquee partners-marq">
       <div class="marquee__track">
         <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA ENERGY</span><span class="wordmark">NORDBANK</span><span class="wordmark">KELVIN &amp; ROSS</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA AUDIO</span><span class="wordmark">MERIDIAN</span><span class="wordmark">STRØM</span>
         <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA ENERGY</span><span class="wordmark">NORDBANK</span><span class="wordmark">KELVIN &amp; ROSS</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA AUDIO</span><span class="wordmark">MERIDIAN</span><span class="wordmark">STRØM</span>
       </div>
     </div>
+    <div class="container">
+      <div class="partners-vector">
+        <svg class="partners-vector__art" viewBox="0 0 400 200" fill="none" aria-hidden="true" preserveAspectRatio="none">
+          <g stroke="currentColor" stroke-width="1.4" fill="none" opacity=".8">
+            <path d="M-10 60 C90 10 150 110 250 60 S400 20 410 70"/>
+            <path d="M-10 100 C80 60 170 150 260 100 S400 70 410 110"/>
+            <path d="M-10 140 C100 190 160 90 260 145 S400 180 410 140"/>
+          </g>
+        </svg>
+        <div class="partners-vector__copy">
+          <p>Von Reifen bis Recruiting — ein Team, das an dieselbe Ziellinie glaubt.</p>
+          <a class="split__link" href="#store" style="color:var(--bg-dark)">Partner werden
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <footer class="footer">
+  <!-- ================= H3 — SOCIALS FAN-OUT (arc of tall phone-cards) ================= -->
+  <section class="socials topo-light" data-topo id="socials">
+    <div class="container">
+      <div class="socials__head">
+        <svg class="socials__icon" viewBox="0 0 48 30" fill="none" aria-hidden="true"><rect x="1" y="1" width="46" height="28" rx="10" stroke="currentColor" stroke-width="1.6"/><circle cx="15" cy="15" r="3.4" stroke="currentColor" stroke-width="1.6"/><circle cx="33" cy="15" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M22 12v6M25 12v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <h2 class="display socials__title">Was läuft <span class="serif serif-i socials__word">auf Social</span></h2>
+      </div>
+      <div class="fan" id="fan" aria-label="Social-Kanäle">
+        <a class="phone" href="#socials" style="--i:-2" aria-label="Instagram"><span class="phone__media grade-3"></span><span class="phone__label"><span class="eyebrow">Instagram</span><span class="phone__tag">@kaivoss</span></span></a>
+        <a class="phone" href="#socials" style="--i:-1" aria-label="TikTok"><span class="phone__media grade-5"></span><span class="phone__label"><span class="eyebrow">TikTok</span><span class="phone__tag">@kv.racing</span></span></a>
+        <a class="phone phone--center" href="#socials" style="--i:0" aria-label="YouTube"><span class="phone__media grade-7"></span><span class="phone__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg></span><span class="phone__label"><span class="eyebrow">YouTube</span><span class="phone__tag">Kai Voss</span></span></a>
+        <a class="phone" href="#socials" style="--i:1" aria-label="X"><span class="phone__media grade-4"></span><span class="phone__label"><span class="eyebrow">X / Twitter</span><span class="phone__tag">@kaivoss</span></span></a>
+        <a class="phone" href="#socials" style="--i:2" aria-label="Strava"><span class="phone__media grade-6"></span><span class="phone__label"><span class="eyebrow">Strava</span><span class="phone__tag">KV Athletics</span></span></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer topo-dark" data-topo>
     <div class="container">
       <div class="footer__statement">
-        <h2 class="display">Immer im<br>Kampfmodus.</h2>
-        <svg class="kv-mono" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+        <h2 class="display">Immer im <span class="serif serif-i footer__word">Kampf.</span></h2>
+        <svg class="kv-mono footer__spin" viewBox="0 0 100 100" fill="none" aria-hidden="true">
           <path d="M22 20 L22 80 M22 50 L48 20 M30 50 L48 80" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M56 20 L70 80 L84 20" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -822,6 +1032,10 @@
           <a href="#store">Caps</a>
           <a href="#store">Team-Wear</a>
         </div>
+      </div>
+
+      <div class="footer__partners">
+        <span class="wordmark">APEXWEAR</span><span class="wordmark">VOLTA</span><span class="wordmark">NORDBANK</span><span class="wordmark">HELIX TYRES</span><span class="wordmark">AURA</span><span class="wordmark">STRØM</span>
       </div>
 
       <div class="footer__legal">
@@ -969,14 +1183,28 @@
 
       /* ---- Nav text-color adaptation over light/accent sections (no background bar; runs even
              under reduced-motion since it is legibility, not motion) ---- */
+      /* ---- B4 — single-source nav colour flip (dark logo/menu over light sections;
+             store-pill stays lime). One geometry check per scroll = no toggle races. ---- */
       var navEl = document.querySelector(".nav");
+      var heroProg = 0; // shared with hero scrub; 0 = hero still light
       if (navEl) {
-        window.gsap.utils.toArray(".split, .store-cta").forEach(function (sec) {
-          window.ScrollTrigger.create({
-            trigger: sec, start: "top 56px", end: "bottom 56px",
-            onToggle: function (self) { navEl.classList.toggle("is-light", self.isActive); }
+        var lightEls = window.gsap.utils.toArray(".gallery, .split, .store-cta, .partners-full, .socials");
+        var heroRef = document.querySelector(".hero");
+        var updateNavLight = function () {
+          var y = 58, light = false;
+          if (heroRef) {
+            var hr = heroRef.getBoundingClientRect();
+            if (hr.top <= y && hr.bottom >= y && heroProg < 0.45) light = true;
+          }
+          if (!light) light = lightEls.some(function (el) {
+            var r = el.getBoundingClientRect();
+            return r.top <= y && r.bottom >= y;
           });
-        });
+          navEl.classList.toggle("is-light", light);
+        };
+        window.ScrollTrigger.create({ trigger: document.body, start: 0, end: "max", onUpdate: updateNavLight });
+        window.ScrollTrigger.addEventListener("refresh", updateNavLight);
+        updateNavLight();
       }
 
       if (reduce) { return; } // skip all scroll motion under reduced-motion
@@ -987,24 +1215,43 @@
          card; a marquee band is revealed behind it; the big name settles. Replicated here in
          CSS-art: media panel scales full-bleed → card, KAI VOSS scales down + rises, band reveals. */
       var heroMedia = document.querySelector(".hero__media");
-      if (heroMedia) {
+      var heroEl = document.querySelector(".hero");
+      if (heroMedia && heroEl) {
         var htl = window.gsap.timeline({
           scrollTrigger: {
-            trigger: ".hero", start: "top top", end: "+=100%",
-            pin: true, scrub: 0.3, invalidateOnRefresh: true
+            trigger: ".hero", start: "top top", end: "+=110%",
+            pin: true, scrub: 0.3, invalidateOnRefresh: true,
+            onUpdate: function (self) {
+              // nav flips dark→light as the hero bg flips light→dark (crossover ~0.45)
+              heroProg = self.progress;
+              if (typeof updateNavLight === "function") updateNavLight();
+            }
           }
         });
-        htl.to(".hero__media", { scale: 0.7, borderRadius: "3rem", ease: "none" }, 0)
-           .fromTo(".hero__band", { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0.05)
-           .to(".hero h1", { scale: 0.66, yPercent: -42, transformOrigin: "left bottom", ease: "none" }, 0)
-           .to(".hero__sub, .hero__foot", { yPercent: -35, autoAlpha: 0.15, ease: "none" }, 0.4);
+        // media full-bleed → centered card (~scale .58 → ~56vw×56vh, matches Norris end)
+        htl.to(".hero__media", { scale: 0.46, borderRadius: "16px", ease: "none" }, 0)
+           .to(".hero__grade", { opacity: 1, ease: "none" }, 0)
+           // body bg flips light → dark behind the shrinking card
+           .to(".hero", { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim() || "#23261c", ease: "none" }, 0)
+           // two-line marquee band reveals behind the media (starts a touch after the shrink begins)
+           .fromTo(".hero__band", { autoAlpha: 0 }, { autoAlpha: 1, ease: "none" }, 0.12)
+           // editorial overlay recedes
+           .to(".hero__inner", { yPercent: -6, autoAlpha: 0, ease: "none" }, 0.05);
       }
 
       /* ---- Global scroll reveals for headings ---- */
-      window.gsap.utils.toArray(".gallery__head, .helmets__head, .store-cta__inner, .footer__statement").forEach(function (el) {
+      window.gsap.utils.toArray(".gallery__head, .helmets__head, .store-cta__inner, .footer__statement, .socials__head, .partners-full__head").forEach(function (el) {
         window.gsap.from(el, {
           y: 30, opacity: 0, duration: 0.75, ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 85%", once: true }
+        });
+      });
+
+      /* ---- I1 — gentle parallax on the global topo-contour layer (per section) ---- */
+      window.gsap.utils.toArray("[data-topo]").forEach(function (sec) {
+        window.gsap.fromTo(sec, { "--topo-shift": "-46px" }, {
+          "--topo-shift": "46px", ease: "none",
+          scrollTrigger: { trigger: sec, start: "top bottom", end: "bottom top", scrub: true }
         });
       });
 
@@ -1059,18 +1306,41 @@
       var splitStage = document.querySelector(".split__stage");
       if (splitStage) {
         var vw = function () { return window.innerWidth; };
+        /* F2 — handwritten accent stroke that DRAWS itself over the words on scroll */
+        var splitDrawPath = document.getElementById("splitDrawPath");
+        var splitDrawLen = splitDrawPath ? splitDrawPath.getTotalLength() : 0;
+        if (splitDrawPath) {
+          splitDrawPath.style.strokeDasharray = splitDrawLen;
+          splitDrawPath.style.strokeDashoffset = splitDrawLen;
+        }
+        /* F1 — slower + absolutely smooth: longer scroll range, higher scrub, and the
+           portraits/words EASE as they arrive at centre (power2.out) instead of linear. */
         var stl = window.gsap.timeline({
           scrollTrigger: {
-            trigger: ".split", start: "top 85%", end: "top 25%",
-            scrub: 0.6, invalidateOnRefresh: true
+            trigger: ".split", start: "top bottom", end: "top 12%",
+            scrub: 1.2, invalidateOnRefresh: true
           }
         });
-        stl.fromTo("#splitLeft",  { x: function () { return -vw() * 0.75; } }, { x: 0, ease: "none" }, 0)
-           .fromTo("#splitRight", { x: function () { return  vw() * 0.75; } }, { x: 0, ease: "none" }, 0)
-           .fromTo("#wordAuf",    { x: function () { return -vw() * 0.18; }, autoAlpha: 0.15 }, { x: 0, autoAlpha: 1, ease: "none" }, 0.05)
-           .fromTo("#wordNeben",  { x: function () { return  vw() * 0.18; }, autoAlpha: 0.15 }, { x: 0, autoAlpha: 1, ease: "none" }, 0.05)
-           .fromTo("#splitScript", { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "none" }, 0.22)
-           .fromTo("#splitCtas",   { y: 32, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "none" }, 0.55);
+        stl.fromTo("#splitLeft",  { x: function () { return -vw() * 0.82; } }, { x: 0, ease: "power2.out" }, 0)
+           .fromTo("#splitRight", { x: function () { return  vw() * 0.82; } }, { x: 0, ease: "power2.out" }, 0)
+           .fromTo("#wordAuf",    { x: function () { return -vw() * 0.20; }, autoAlpha: 0.12 }, { x: 0, autoAlpha: 1, ease: "power2.out" }, 0.08)
+           .fromTo("#wordNeben",  { x: function () { return  vw() * 0.20; }, autoAlpha: 0.12 }, { x: 0, autoAlpha: 1, ease: "power2.out" }, 0.08)
+           .to("#splitDrawPath", { strokeDashoffset: 0, ease: "none" }, 0.34)
+           .fromTo("#splitScript", { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "power2.out" }, 0.30)
+           .fromTo("#splitCtas",   { y: 34, autoAlpha: 0 }, { y: 0, autoAlpha: 1, ease: "power2.out" }, 0.6);
+      }
+
+      /* ---- H3 — socials fan-out pop (collapsed centre → fanned arc) ---- */
+      var phones = window.gsap.utils.toArray(".fan .phone");
+      if (phones.length) {
+        window.gsap.from(phones, {
+          x: 0, y: 70, rotation: 0, scale: 0.82, autoAlpha: 0,
+          transformOrigin: "bottom center",
+          duration: 0.85, ease: "power3.out",
+          stagger: { each: 0.09, from: "center" },
+          immediateRender: false, /* keep fanned CSS as the pre-trigger fallback */
+          scrollTrigger: { trigger: ".fan", start: "top 78%", once: true }
+        });
       }
 
       /* ---- TASK 6 — staggered helmet reveal ---- */
